@@ -31,6 +31,11 @@ export interface LibroContent {
   description: string;
   secondDescription: string;
   purchaseUrl: string;
+  features?: string[];
+  highlights?: string[];
+  targetAudience?: string[];
+  authorBio?: string;
+  quote?: string;
 }
 
 export interface ContattiContent {
