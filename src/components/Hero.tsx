@@ -38,7 +38,7 @@ const Hero = () => {
           transition={{ duration: 0.8, delay: 0.4 }}
         >
           <p className="text-xl sm:text-2xl md:text-3xl text-white/90 mb-12 font-light">
-            Psicologo • Ricercatore • Autore
+            Psicologo • Scienziato cognitivo • Filosofo della mente • Ipnologo
           </p>
         </motion.div>
 
