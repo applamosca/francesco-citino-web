@@ -65,15 +65,27 @@ export const useUpdateContent = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ section, content }: { section: string; content: any }) => {
-      const { data, error } = await supabase
-        .from("site_content")
-        .update({ content })
-        .eq("section", section)
-        .select()
-        .single();
+    mutationFn: async ({ 
+      section, 
+      content, 
+      password 
+    }: { 
+      section: string; 
+      content: any; 
+      password: string;
+    }) => {
+      // Call secure edge function instead of direct update
+      const { data, error } = await supabase.functions.invoke('admin-update-content', {
+        body: {
+          section,
+          content,
+          password,
+        },
+      });
 
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      
       return data;
     },
     onSuccess: (_, variables) => {

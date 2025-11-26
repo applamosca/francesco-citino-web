@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Lock, Save, Eye, EyeOff, LogOut } from "lucide-react";
+import { Lock, Save, Eye, EyeOff, LogOut, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,7 @@ const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [adminPassword, setAdminPassword] = useState(""); // Store password for updates
 
   // Content queries
   const { data: heroContent } = useContent("hero");
@@ -42,6 +43,11 @@ const Admin = () => {
     description: "",
     secondDescription: "",
     purchaseUrl: "",
+    features: [],
+    highlights: [],
+    targetAudience: [],
+    authorBio: "",
+    quote: "",
   });
   const [contattiForm, setContattiForm] = useState<ContattiContent>({
     email: "",
@@ -54,8 +60,10 @@ const Admin = () => {
   // Check authentication from sessionStorage
   useEffect(() => {
     const auth = sessionStorage.getItem("admin_authenticated");
-    if (auth === "true") {
+    const storedPassword = sessionStorage.getItem("admin_password");
+    if (auth === "true" && storedPassword) {
       setIsAuthenticated(true);
+      setAdminPassword(storedPassword);
     }
   }, []);
 
@@ -72,7 +80,9 @@ const Admin = () => {
     // Simple password check: 'psico2025'
     if (password === "psico2025") {
       setIsAuthenticated(true);
+      setAdminPassword(password);
       sessionStorage.setItem("admin_authenticated", "true");
+      sessionStorage.setItem("admin_password", password);
       toast({
         title: "Accesso consentito",
         description: "Benvenuto nel pannello admin",
@@ -88,7 +98,9 @@ const Admin = () => {
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    setAdminPassword("");
     sessionStorage.removeItem("admin_authenticated");
+    sessionStorage.removeItem("admin_password");
     setPassword("");
     toast({
       title: "Disconnesso",
@@ -98,15 +110,20 @@ const Admin = () => {
 
   const handleSave = async (section: string, content: any) => {
     try {
-      await updateContentMutation.mutateAsync({ section, content });
+      await updateContentMutation.mutateAsync({ 
+        section, 
+        content,
+        password: adminPassword,
+      });
       toast({
         title: "Salvato!",
         description: `Sezione ${section} aggiornata con successo`,
       });
     } catch (error) {
+      console.error('Save error:', error);
       toast({
         title: "Errore",
-        description: "Impossibile salvare le modifiche",
+        description: error instanceof Error ? error.message : "Impossibile salvare le modifiche",
         variant: "destructive",
       });
     }
@@ -210,9 +227,9 @@ const Admin = () => {
                 onChange={(e) => setHeroForm({ ...heroForm, subtitle: e.target.value })}
               />
             </div>
-            <Button onClick={() => handleSave("hero", heroForm)}>
+            <Button onClick={() => handleSave("hero", heroForm)} disabled={updateContentMutation.isPending}>
               <Save className="mr-2" size={18} />
-              Salva Hero
+              {updateContentMutation.isPending ? "Salvataggio..." : "Salva Hero"}
             </Button>
           </CardContent>
         </Card>
@@ -242,7 +259,7 @@ const Admin = () => {
                 rows={3}
               />
             </div>
-            <Button onClick={() => handleSave("chi_sono", chiSonoForm)}>
+            <Button onClick={() => handleSave("chi_sono", chiSonoForm)} disabled={updateContentMutation.isPending}>
               <Save className="mr-2" size={18} />
               Salva Chi Sono
             </Button>
@@ -280,55 +297,215 @@ const Admin = () => {
                 />
               </div>
             ))}
-            <Button onClick={() => handleSave("servizi", serviziForm)}>
+            <Button onClick={() => handleSave("servizi", serviziForm)} disabled={updateContentMutation.isPending}>
               <Save className="mr-2" size={18} />
               Salva Servizi
             </Button>
           </CardContent>
         </Card>
 
-        {/* Libro Section */}
+        {/* Libro Section - EXPANDED */}
         <Card>
           <CardHeader>
             <CardTitle>Sezione Libro</CardTitle>
-            <CardDescription>Modifica informazioni sul libro</CardDescription>
+            <CardDescription>Modifica tutte le informazioni sul libro</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="libro-title">Titolo Libro</Label>
-              <Input
-                id="libro-title"
-                value={libroForm.title}
-                onChange={(e) => setLibroForm({ ...libroForm, title: e.target.value })}
-              />
+          <CardContent className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="libro-title">Titolo Libro</Label>
+                <Input
+                  id="libro-title"
+                  value={libroForm.title}
+                  onChange={(e) => setLibroForm({ ...libroForm, title: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="libro-subtitle">Sottotitolo</Label>
+                <Input
+                  id="libro-subtitle"
+                  value={libroForm.subtitle}
+                  onChange={(e) => setLibroForm({ ...libroForm, subtitle: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="libro-desc">Descrizione Principale</Label>
+                <Textarea
+                  id="libro-desc"
+                  value={libroForm.description}
+                  onChange={(e) => setLibroForm({ ...libroForm, description: e.target.value })}
+                  rows={4}
+                />
+              </div>
+              <div>
+                <Label htmlFor="libro-desc2">Seconda Descrizione</Label>
+                <Textarea
+                  id="libro-desc2"
+                  value={libroForm.secondDescription}
+                  onChange={(e) => setLibroForm({ ...libroForm, secondDescription: e.target.value })}
+                  rows={3}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="libro-subtitle">Sottotitolo</Label>
-              <Input
-                id="libro-subtitle"
-                value={libroForm.subtitle}
-                onChange={(e) => setLibroForm({ ...libroForm, subtitle: e.target.value })}
-              />
+
+            {/* Features/Tecniche Pratiche */}
+            <div className="border-t pt-6">
+              <Label className="text-lg">Tecniche Pratiche</Label>
+              <div className="space-y-2 mt-3">
+                {libroForm.features?.map((feature, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      value={feature}
+                      onChange={(e) => {
+                        const newFeatures = [...(libroForm.features || [])];
+                        newFeatures[index] = e.target.value;
+                        setLibroForm({ ...libroForm, features: newFeatures });
+                      }}
+                      placeholder="Tecnica pratica"
+                    />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => {
+                        const newFeatures = libroForm.features?.filter((_, i) => i !== index);
+                        setLibroForm({ ...libroForm, features: newFeatures });
+                      }}
+                    >
+                      <Trash2 size={18} />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setLibroForm({ 
+                      ...libroForm, 
+                      features: [...(libroForm.features || []), ""] 
+                    });
+                  }}
+                >
+                  <Plus className="mr-2" size={18} />
+                  Aggiungi Tecnica
+                </Button>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="libro-desc">Descrizione Principale</Label>
-              <Textarea
-                id="libro-desc"
-                value={libroForm.description}
-                onChange={(e) => setLibroForm({ ...libroForm, description: e.target.value })}
-                rows={3}
-              />
+
+            {/* Highlights/Perché è unico */}
+            <div className="border-t pt-6">
+              <Label className="text-lg">Perché questo libro è unico</Label>
+              <div className="space-y-2 mt-3">
+                {libroForm.highlights?.map((highlight, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      value={highlight}
+                      onChange={(e) => {
+                        const newHighlights = [...(libroForm.highlights || [])];
+                        newHighlights[index] = e.target.value;
+                        setLibroForm({ ...libroForm, highlights: newHighlights });
+                      }}
+                      placeholder="Punto di forza"
+                    />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => {
+                        const newHighlights = libroForm.highlights?.filter((_, i) => i !== index);
+                        setLibroForm({ ...libroForm, highlights: newHighlights });
+                      }}
+                    >
+                      <Trash2 size={18} />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setLibroForm({ 
+                      ...libroForm, 
+                      highlights: [...(libroForm.highlights || []), ""] 
+                    });
+                  }}
+                >
+                  <Plus className="mr-2" size={18} />
+                  Aggiungi Highlight
+                </Button>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="libro-url">URL Acquisto</Label>
-              <Input
-                id="libro-url"
-                value={libroForm.purchaseUrl}
-                onChange={(e) => setLibroForm({ ...libroForm, purchaseUrl: e.target.value })}
-                placeholder="https://..."
-              />
+
+            {/* Target Audience/A chi è rivolto */}
+            <div className="border-t pt-6">
+              <Label className="text-lg">A chi è rivolto</Label>
+              <div className="space-y-2 mt-3">
+                {libroForm.targetAudience?.map((audience, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      value={audience}
+                      onChange={(e) => {
+                        const newAudience = [...(libroForm.targetAudience || [])];
+                        newAudience[index] = e.target.value;
+                        setLibroForm({ ...libroForm, targetAudience: newAudience });
+                      }}
+                      placeholder="Target audience"
+                    />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => {
+                        const newAudience = libroForm.targetAudience?.filter((_, i) => i !== index);
+                        setLibroForm({ ...libroForm, targetAudience: newAudience });
+                      }}
+                    >
+                      <Trash2 size={18} />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setLibroForm({ 
+                      ...libroForm, 
+                      targetAudience: [...(libroForm.targetAudience || []), ""] 
+                    });
+                  }}
+                >
+                  <Plus className="mr-2" size={18} />
+                  Aggiungi Target
+                </Button>
+              </div>
             </div>
-            <Button onClick={() => handleSave("libro", libroForm)}>
+
+            {/* Author Bio e Quote */}
+            <div className="border-t pt-6 space-y-4">
+              <div>
+                <Label htmlFor="libro-author">Biografia Autore</Label>
+                <Textarea
+                  id="libro-author"
+                  value={libroForm.authorBio}
+                  onChange={(e) => setLibroForm({ ...libroForm, authorBio: e.target.value })}
+                  rows={3}
+                />
+              </div>
+              <div>
+                <Label htmlFor="libro-quote">Citazione</Label>
+                <Textarea
+                  id="libro-quote"
+                  value={libroForm.quote}
+                  onChange={(e) => setLibroForm({ ...libroForm, quote: e.target.value })}
+                  rows={2}
+                />
+              </div>
+              <div>
+                <Label htmlFor="libro-url">URL Acquisto</Label>
+                <Input
+                  id="libro-url"
+                  value={libroForm.purchaseUrl}
+                  onChange={(e) => setLibroForm({ ...libroForm, purchaseUrl: e.target.value })}
+                  placeholder="https://..."
+                />
+              </div>
+            </div>
+
+            <Button onClick={() => handleSave("libro", libroForm)} disabled={updateContentMutation.isPending}>
               <Save className="mr-2" size={18} />
               Salva Libro
             </Button>
@@ -369,7 +546,7 @@ const Admin = () => {
                 placeholder="https://instagram.com/..."
               />
             </div>
-            <Button onClick={() => handleSave("contatti", contattiForm)}>
+            <Button onClick={() => handleSave("contatti", contattiForm)} disabled={updateContentMutation.isPending}>
               <Save className="mr-2" size={18} />
               Salva Contatti
             </Button>
