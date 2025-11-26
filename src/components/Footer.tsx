@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
 import { useContent, type ContattiContent } from "@/hooks/useContent";
-import { Mail, Instagram, Facebook, Phone } from "lucide-react";
+import { Mail, Instagram, Facebook, Phone, Eye } from "lucide-react";
+import { useVisitCounter } from "@/hooks/useVisitCounter";
 
 const Footer = () => {
   const { data: content } = useContent("contatti");
   const contattiContent = content as unknown as ContattiContent;
+  const { totalVisits, isLoading } = useVisitCounter();
 
   return (
     <footer className="sticky bottom-0 md:static bg-background/95 md:bg-background backdrop-blur-sm md:backdrop-blur-none text-foreground border-t border-border/40 py-4 md:py-8 z-40">
@@ -21,6 +23,14 @@ const Footer = () => {
           <p className="text-xs md:text-sm text-muted-foreground font-medium">
             Seguimi sui social per aggiornamenti e contenuti
           </p>
+
+          {/* Visit Counter */}
+          {!isLoading && totalVisits > 0 && (
+            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground/70">
+              <Eye size={14} />
+              <span>{totalVisits.toLocaleString()} visite</span>
+            </div>
+          )}
 
           {/* Social Media Icons */}
           {contattiContent && (

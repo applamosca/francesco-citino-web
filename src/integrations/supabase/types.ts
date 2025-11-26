@@ -56,12 +56,30 @@ export type Database = {
         }
         Relationships: []
       }
+      site_visits: {
+        Row: {
+          id: string
+          visit_count: number
+          visit_date: string
+        }
+        Insert: {
+          id?: string
+          visit_count?: number
+          visit_date?: string
+        }
+        Update: {
+          id?: string
+          visit_count?: number
+          visit_date?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_visit_count: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
