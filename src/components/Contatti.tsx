@@ -2,11 +2,8 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
 import { useContent, type ContattiContent } from "@/hooks/useContent";
-import { Mail } from "lucide-react";
+import { Mail, Instagram, Facebook, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import instagramLogo from "@/assets/instagram-logo.png";
-import facebookLogo from "@/assets/facebook-logo.png";
-import whatsappLogo from "@/assets/whatsapp-logo.png";
 
 const Contatti = () => {
   const ref = useRef(null);
@@ -66,7 +63,7 @@ const Contatti = () => {
                   className="w-full justify-start text-left hover:bg-primary/5 hover:border-primary transition-all duration-300"
                   onClick={() => window.open(contattiContent.instagramUrl, "_blank")}
                 >
-                  <img src={instagramLogo} alt="Instagram" className="mr-3 w-6 h-6" />
+                  <Instagram className="mr-3 text-primary" size={24} />
                   <div>
                     <p className="font-semibold text-foreground">Instagram</p>
                     <p className="text-muted-foreground">{contattiContent.instagram}</p>
@@ -86,7 +83,7 @@ const Contatti = () => {
                     className="w-full justify-start text-left hover:bg-primary/5 hover:border-primary transition-all duration-300"
                     onClick={() => window.open(contattiContent.facebookUrl, "_blank")}
                   >
-                    <img src={facebookLogo} alt="Facebook" className="mr-3 w-6 h-6" />
+                    <Facebook className="mr-3 text-primary" size={24} />
                     <div>
                       <p className="font-semibold text-foreground">Facebook</p>
                       <p className="text-muted-foreground">{contattiContent.facebook}</p>
@@ -107,7 +104,7 @@ const Contatti = () => {
                     className="w-full justify-start text-left hover:bg-primary/5 hover:border-primary transition-all duration-300"
                     onClick={() => window.open(contattiContent.whatsappUrl, "_blank")}
                   >
-                    <img src={whatsappLogo} alt="WhatsApp" className="mr-3 w-6 h-6" />
+                    <Phone className="mr-3 text-primary" size={24} />
                     <div>
                       <p className="font-semibold text-foreground">WhatsApp</p>
                       <p className="text-muted-foreground">{contattiContent.whatsapp}</p>
