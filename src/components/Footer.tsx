@@ -7,21 +7,23 @@ const Footer = () => {
   const contattiContent = content as unknown as ContattiContent;
 
   return (
-    <footer className="bg-primary text-primary-foreground py-6 md:py-8">
+    <footer className="bg-background text-foreground border-t border-border/40 py-6 md:py-8">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center space-y-3 md:space-y-4">
           <p className="text-xs md:text-sm lg:text-base mb-1 md:mb-2">
             © {new Date().getFullYear()} Francesco Citino. Tutti i diritti riservati.
           </p>
-          <p className="text-xs md:text-sm opacity-80">
+          <p className="text-xs md:text-sm text-muted-foreground">
             Psicologo • Ricercatore • Autore
           </p>
           
           {/* Separatore */}
           <div className="flex items-center justify-center py-2 md:py-3">
-            <div className="h-px bg-primary-foreground/20 flex-1 max-w-[80px] md:max-w-xs"></div>
-            <span className="px-3 md:px-4 text-[10px] md:text-xs opacity-60">Seguimi</span>
-            <div className="h-px bg-primary-foreground/20 flex-1 max-w-[80px] md:max-w-xs"></div>
+            <div className="h-px bg-border flex-1 max-w-[80px] md:max-w-xs" />
+            <span className="px-3 md:px-4 text-[10px] md:text-xs text-muted-foreground">
+              Seguimi
+            </span>
+            <div className="h-px bg-border flex-1 max-w-[80px] md:max-w-xs" />
           </div>
 
           {/* Social Media Icons */}
@@ -31,12 +33,12 @@ const Footer = () => {
                 href={`mailto:${contattiContent.email}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group hover:scale-125 transition-all duration-300"
+                className="group inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background hover:bg-primary/5 hover:border-primary/60 transition-all duration-300"
                 aria-label="Email"
               >
-                <Mail 
-                  size={18} 
-                  className="md:w-5 md:h-5 text-primary-foreground opacity-80 group-hover:opacity-100 transition-all duration-300 group-hover:rotate-12" 
+                <Mail
+                  size={18}
+                  className="md:w-5 md:h-5 text-primary opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-transform duration-300"
                 />
               </a>
               {contattiContent.instagramUrl && (
@@ -44,12 +46,12 @@ const Footer = () => {
                   href={contattiContent.instagramUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group hover:scale-125 transition-all duration-300"
+                  className="group inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background hover:bg-primary/5 hover:border-primary/60 transition-all duration-300"
                   aria-label="Instagram"
                 >
-                  <Instagram 
+                  <Instagram
                     size={18}
-                    className="md:w-5 md:h-5 text-primary-foreground opacity-80 group-hover:opacity-100 transition-all duration-300 group-hover:rotate-12"
+                    className="md:w-5 md:h-5 text-primary opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-transform duration-300"
                   />
                 </a>
               )}
@@ -58,12 +60,12 @@ const Footer = () => {
                   href={contattiContent.facebookUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group hover:scale-125 transition-all duration-300"
+                  className="group inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background hover:bg-primary/5 hover:border-primary/60 transition-all duration-300"
                   aria-label="Facebook"
                 >
-                  <Facebook 
+                  <Facebook
                     size={18}
-                    className="md:w-5 md:h-5 text-primary-foreground opacity-80 group-hover:opacity-100 transition-all duration-300 group-hover:-rotate-12"
+                    className="md:w-5 md:h-5 text-primary opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-transform duration-300"
                   />
                 </a>
               )}
@@ -72,21 +74,21 @@ const Footer = () => {
                   href={contattiContent.whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group hover:scale-125 transition-all duration-300"
+                  className="group inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background hover:bg-primary/5 hover:border-primary/60 transition-all duration-300"
                   aria-label="WhatsApp"
                 >
-                  <Phone 
+                  <Phone
                     size={18}
-                    className="md:w-5 md:h-5 text-primary-foreground opacity-80 group-hover:opacity-100 transition-all duration-300 group-hover:rotate-12"
+                    className="md:w-5 md:h-5 text-primary opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-transform duration-300"
                   />
                 </a>
               )}
             </div>
           )}
 
-          <Link 
-            to="/admin" 
-            className="inline-block mt-3 md:mt-4 text-[10px] md:text-xs opacity-50 hover:opacity-100 transition-opacity"
+          <Link
+            to="/admin"
+            className="inline-block mt-3 md:mt-4 text-[10px] md:text-xs text-muted-foreground/70 hover:text-muted-foreground transition-colors"
           >
             Admin
           </Link>
