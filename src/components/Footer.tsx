@@ -17,9 +17,16 @@ const Footer = () => {
             Psicologo • Ricercatore • Autore
           </p>
           
+          {/* Separatore */}
+          <div className="flex items-center justify-center py-2">
+            <div className="h-px bg-primary-foreground/20 flex-1 max-w-xs"></div>
+            <span className="px-4 text-xs opacity-60">Seguimi</span>
+            <div className="h-px bg-primary-foreground/20 flex-1 max-w-xs"></div>
+          </div>
+
           {/* Social Media Icons */}
           {contattiContent && (
-            <div className="flex justify-center items-center gap-4 pt-2">
+            <div className="flex justify-center items-center gap-6 pt-2">
               <a
                 href={`mailto:${contattiContent.email}`}
                 target="_blank"
@@ -37,7 +44,14 @@ const Footer = () => {
                   className="hover:scale-110 transition-transform duration-200"
                   aria-label="Instagram"
                 >
-                  <Instagram size={20} className="opacity-80 hover:opacity-100" />
+                  <Instagram 
+                    size={20} 
+                    className="opacity-90 hover:opacity-100 transition-opacity"
+                    style={{ 
+                      color: '#E4405F',
+                      filter: 'drop-shadow(0 0 2px rgba(228, 64, 95, 0.5))'
+                    }} 
+                  />
                 </a>
               )}
               {contattiContent.facebookUrl && (
@@ -48,7 +62,14 @@ const Footer = () => {
                   className="hover:scale-110 transition-transform duration-200"
                   aria-label="Facebook"
                 >
-                  <Facebook size={20} className="opacity-80 hover:opacity-100" />
+                  <Facebook 
+                    size={20} 
+                    className="opacity-90 hover:opacity-100 transition-opacity"
+                    style={{ 
+                      color: '#1877F2',
+                      filter: 'drop-shadow(0 0 2px rgba(24, 119, 242, 0.5))'
+                    }} 
+                  />
                 </a>
               )}
               {contattiContent.whatsappUrl && (
@@ -59,7 +80,14 @@ const Footer = () => {
                   className="hover:scale-110 transition-transform duration-200"
                   aria-label="WhatsApp"
                 >
-                  <Phone size={20} className="opacity-80 hover:opacity-100" />
+                  <Phone 
+                    size={20} 
+                    className="opacity-90 hover:opacity-100 transition-opacity"
+                    style={{ 
+                      color: '#25D366',
+                      filter: 'drop-shadow(0 0 2px rgba(37, 211, 102, 0.5))'
+                    }} 
+                  />
                 </a>
               )}
             </div>
