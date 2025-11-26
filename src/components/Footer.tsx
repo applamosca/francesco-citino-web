@@ -1,6 +1,6 @@
-import { Link } from "react-router-dom";
 import { useContent, type ContattiContent } from "@/hooks/useContent";
-import { Mail, Instagram, Facebook, Phone, Eye } from "lucide-react";
+import { Mail, Eye } from "lucide-react";
+import { FaFacebookSquare, FaInstagram, FaWhatsapp } from "react-icons/fa";
 import { useVisitCounter } from "@/hooks/useVisitCounter";
 import { motion } from "framer-motion";
 
@@ -56,47 +56,38 @@ const Footer = () => {
             </motion.div>
           )}
 
-          {/* Social Media Icons */}
+          {/* Social Media Icons con react-icons */}
           {contattiContent && (
-            <div className="flex justify-center items-center gap-3 md:gap-6 pt-1">
+            <div className="flex justify-center items-center gap-4 md:gap-6 pt-1">
               <a
                 href={`mailto:${contattiContent.email}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-full border border-border bg-background hover:bg-primary/5 hover:border-primary/60 transition-all duration-300"
+                className="text-2xl md:text-3xl text-muted-foreground hover:text-primary transition-all duration-300 transform hover:scale-110"
                 aria-label="Email"
               >
-                <Mail
-                  size={16}
-                  className="md:w-5 md:h-5 text-primary opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-transform duration-300"
-                />
+                <Mail size={28} className="md:w-8 md:h-8" />
               </a>
-              {contattiContent.instagramUrl && (
-                <a
-                  href={contattiContent.instagramUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group inline-flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-full border border-border bg-background hover:bg-primary/5 hover:border-primary/60 transition-all duration-300"
-                  aria-label="Instagram"
-                >
-                  <Instagram
-                    size={16}
-                    className="md:w-5 md:h-5 text-primary opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-transform duration-300"
-                  />
-                </a>
-              )}
               {contattiContent.facebookUrl && (
                 <a
                   href={contattiContent.facebookUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group inline-flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-full border border-border bg-background hover:bg-primary/5 hover:border-primary/60 transition-all duration-300"
+                  className="text-2xl md:text-3xl text-muted-foreground hover:text-[#1877F2] transition-all duration-300 transform hover:scale-110"
                   aria-label="Facebook"
                 >
-                  <Facebook
-                    size={16}
-                    className="md:w-5 md:h-5 text-primary opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-transform duration-300"
-                  />
+                  <FaFacebookSquare />
+                </a>
+              )}
+              {contattiContent.instagramUrl && (
+                <a
+                  href={contattiContent.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-2xl md:text-3xl text-muted-foreground hover:text-[#E4405F] transition-all duration-300 transform hover:scale-110"
+                  aria-label="Instagram"
+                >
+                  <FaInstagram />
                 </a>
               )}
               {contattiContent.whatsappUrl && (
@@ -104,13 +95,10 @@ const Footer = () => {
                   href={contattiContent.whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group inline-flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-full border border-border bg-background hover:bg-primary/5 hover:border-primary/60 transition-all duration-300"
+                  className="text-2xl md:text-3xl text-muted-foreground hover:text-[#25D366] transition-all duration-300 transform hover:scale-110"
                   aria-label="WhatsApp"
                 >
-                  <Phone
-                    size={16}
-                    className="md:w-5 md:h-5 text-primary opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-transform duration-300"
-                  />
+                  <FaWhatsapp />
                 </a>
               )}
             </div>
