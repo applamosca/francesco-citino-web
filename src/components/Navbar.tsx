@@ -51,15 +51,21 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? "bg-background/95 backdrop-blur-md shadow-md" : "bg-transparent"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out ${
+        isScrolled 
+          ? "bg-background/80 backdrop-blur-xl shadow-xl border-b border-border/30" 
+          : "bg-background/30 backdrop-blur-sm"
       }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 md:h-20">
+        <div className={`flex items-center justify-between transition-all duration-500 ${
+          isScrolled ? "h-14 md:h-16" : "h-16 md:h-20"
+        }`}>
           <button
             onClick={() => scrollToSection("hero")}
-            className="text-xl md:text-2xl font-bold text-primary hover:text-accent transition-colors"
+            className={`font-bold text-primary hover:text-accent transition-all duration-500 ${
+              isScrolled ? "text-lg md:text-xl" : "text-xl md:text-2xl"
+            }`}
           >
             Francesco Citino
           </button>
@@ -70,8 +76,10 @@ const Navbar = () => {
               <motion.button
                 key={item.id}
                 onClick={() => scrollToSection(item.id)}
-                className={`relative text-foreground font-medium transition-colors ${
-                  activeSection === item.id ? "text-primary" : "hover:text-primary"
+                className={`relative pb-1 font-medium transition-all duration-300 ${
+                  activeSection === item.id 
+                    ? "text-primary" 
+                    : "text-foreground/70 hover:text-foreground"
                 }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -80,9 +88,22 @@ const Navbar = () => {
                 {activeSection === item.id && (
                   <motion.div
                     layoutId="activeSection"
-                    className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary"
+                    className="absolute -bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-accent to-primary rounded-full"
                     initial={false}
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    transition={{ 
+                      type: "spring", 
+                      stiffness: 400, 
+                      damping: 35,
+                      duration: 0.6
+                    }}
+                  />
+                )}
+                {activeSection !== item.id && (
+                  <motion.div
+                    className="absolute -bottom-0 left-0 right-0 h-0.5 bg-primary/30 rounded-full origin-left"
+                    initial={{ scaleX: 0 }}
+                    whileHover={{ scaleX: 1 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
                   />
                 )}
               </motion.button>
@@ -108,7 +129,7 @@ const Navbar = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="md:hidden bg-background/95 backdrop-blur-md border-t border-border shadow-lg"
+            className="md:hidden bg-background/90 backdrop-blur-xl border-t border-border/50 shadow-2xl"
           >
             <motion.div 
               className="container mx-auto px-4 py-4 space-y-2"
