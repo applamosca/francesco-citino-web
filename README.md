@@ -1,73 +1,125 @@
-# Welcome to your Lovable project
+# Francesco Citino - Sito Web Professionale
 
-## Project info
+Sito web professionale del Dr. Francesco Citino, psicologo, scienziato cognitivo, filosofo della mente e ipnologo.
 
-**URL**: https://lovable.dev/projects/8b4e9c8c-8da8-4a65-9f44-0e0bfe46575f
+## 🌟 Caratteristiche
 
-## How can I edit this code?
+- **Design moderno e responsive** - Ottimizzato per tutti i dispositivi
+- **Animazioni fluide** - Realizzate con Framer Motion
+- **SEO ottimizzato** - Meta tag OG e Twitter Cards per una perfetta condivisione social
+- **Performance elevate** - Build ottimizzata con Vite
+- **Accessibilità** - Interfaccia user-friendly e accessibile
 
-There are several ways of editing your application.
+## 🚀 Tecnologie
 
-**Use Lovable**
+- **React 18** - Libreria UI moderna
+- **TypeScript** - Type safety e migliore developer experience
+- **Vite** - Build tool velocissimo
+- **Tailwind CSS** - Utility-first CSS framework
+- **Framer Motion** - Animazioni fluide e performanti
+- **Shadcn/ui** - Componenti UI accessibili e personalizzabili
+- **Lovable Cloud** - Backend integrato (Supabase)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/8b4e9c8c-8da8-4a65-9f44-0e0bfe46575f) and start prompting.
+## 📦 Installazione
 
-Changes made via Lovable will be committed automatically to this repo.
+```bash
+# Clona il repository
+git clone https://github.com/[USERNAME]/francescocitino-website.git
 
-**Use your preferred IDE**
+# Entra nella directory
+cd francescocitino-website
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+# Installa le dipendenze
+npm install
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Avvia il server di sviluppo
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## 🏗️ Build
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+# Build per produzione
+npm run build
 
-**Use GitHub Codespaces**
+# Preview della build
+npm run preview
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🌐 Deploy
 
-## What technologies are used for this project?
+Il sito viene automaticamente deployato su GitHub Pages tramite GitHub Actions ad ogni push sul branch `main`.
 
-This project is built with:
+### Configurazione GitHub Pages
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. Vai su **Settings** → **Pages** nel repository
+2. Seleziona **Source**: GitHub Actions
+3. Il workflow `.github/workflows/deploy.yml` gestirà il deploy automatico
 
-## How can I deploy this project?
+## 📁 Struttura del Progetto
 
-Simply open [Lovable](https://lovable.dev/projects/8b4e9c8c-8da8-4a65-9f44-0e0bfe46575f) and click on Share -> Publish.
+```
+francescocitino-website/
+├── src/
+│   ├── assets/          # Immagini e risorse statiche
+│   ├── components/      # Componenti React
+│   │   ├── ui/         # Componenti UI riutilizzabili
+│   │   ├── Hero.tsx    # Sezione Hero
+│   │   ├── ChiSono.tsx # Sezione biografia
+│   │   ├── Servizi.tsx # Sezione servizi
+│   │   ├── Libro.tsx   # Sezione libro
+│   │   └── Contatti.tsx# Sezione contatti
+│   ├── pages/          # Pagine dell'applicazione
+│   ├── App.tsx         # Componente principale
+│   └── main.tsx        # Entry point
+├── public/             # File statici pubblici
+├── .github/
+│   └── workflows/      # GitHub Actions workflows
+└── index.html          # HTML template
 
-## Can I connect a custom domain to my Lovable project?
+```
 
-Yes, you can!
+## 📝 Sezioni del Sito
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Hero
+Sezione introduttiva con titolo animato e call-to-action
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### Chi Sono
+Biografia professionale completa con formazione multidisciplinare e approccio integrato
+
+### Servizi
+Tre aree principali:
+- Consulenza Psicologica
+- Ricerca e Formazione  
+- Supervisione Professionale
+
+### Libro
+Presentazione del libro "Filosofia dell'Azione"
+
+### Contatti
+Email e social media per entrare in contatto
+
+## 🎨 Personalizzazione
+
+Il design system è configurabile tramite:
+- `src/index.css` - Variabili CSS e temi
+- `tailwind.config.ts` - Configurazione Tailwind
+
+## 📄 Licenza
+
+Questo progetto è distribuito sotto licenza MIT. Vedi il file [LICENSE](LICENSE) per i dettagli.
+
+## 👤 Autore
+
+**Dr. Francesco Citino**
+- Website: [francescocitino.it](https://francescocitino.it)
+- Email: info@francescocitino.it
+- Instagram: [@francescocitino_s.f](https://www.instagram.com/francescocitino_s.f/)
+
+## 🤝 Contributi
+
+Questo è un sito web personale. Per suggerimenti o segnalazioni, contatta direttamente l'autore.
+
+---
+
+Sviluppato con ❤️ usando [Lovable](https://lovable.dev)
