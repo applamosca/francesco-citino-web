@@ -1,12 +1,19 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
+import { useContent, type ContattiContent } from "@/hooks/useContent";
 import { Mail, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Contatti = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { data: content, isLoading } = useContent("contatti");
+  const contattiContent = content as unknown as ContattiContent;
+
+  if (isLoading || !contattiContent) {
+    return <section id="contatti" className="py-20 md:py-32 bg-background" ref={ref} />;
+  }
 
   return (
     <section id="contatti" className="py-20 md:py-32 bg-background" ref={ref}>
@@ -35,12 +42,12 @@ const Contatti = () => {
                   variant="outline"
                   size="lg"
                   className="w-full justify-start text-left hover:bg-primary/5 hover:border-primary transition-all duration-300"
-                  onClick={() => window.location.href = "mailto:info@francescocitino.it"}
+                  onClick={() => window.location.href = `mailto:${contattiContent.email}`}
                 >
                   <Mail className="mr-3 text-primary" size={24} />
                   <div>
                     <p className="font-semibold text-foreground">Email</p>
-                    <p className="text-muted-foreground">info@francescocitino.it</p>
+                    <p className="text-muted-foreground">{contattiContent.email}</p>
                   </div>
                 </Button>
               </motion.div>
@@ -54,12 +61,12 @@ const Contatti = () => {
                   variant="outline"
                   size="lg"
                   className="w-full justify-start text-left hover:bg-primary/5 hover:border-primary transition-all duration-300"
-                  onClick={() => window.open("https://www.instagram.com/francescocitino_s.f/", "_blank")}
+                  onClick={() => window.open(contattiContent.instagramUrl, "_blank")}
                 >
                   <Instagram className="mr-3 text-primary" size={24} />
                   <div>
                     <p className="font-semibold text-foreground">Instagram</p>
-                    <p className="text-muted-foreground">@francescocitino_s.f</p>
+                    <p className="text-muted-foreground">{contattiContent.instagram}</p>
                   </div>
                 </Button>
               </motion.div>

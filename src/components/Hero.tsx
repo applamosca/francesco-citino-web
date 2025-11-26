@@ -2,14 +2,32 @@ import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroBg from "@/assets/hero-bg.jpg";
+import { useContent, type HeroContent } from "@/hooks/useContent";
 
 const Hero = () => {
+  const { data: content, isLoading } = useContent("hero");
+  const heroContent = content as unknown as HeroContent;
+
   const scrollToLibro = () => {
     const element = document.getElementById("libro");
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
     }
   };
+
+  if (isLoading || !heroContent) {
+    return (
+      <section
+        id="hero"
+        className="relative min-h-screen flex items-center justify-center overflow-hidden"
+        style={{
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${heroBg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
+    );
+  }
 
   return (
     <section
@@ -28,7 +46,7 @@ const Hero = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
         >
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
-            Francesco Citino
+            {heroContent.title}
           </h1>
         </motion.div>
 
@@ -38,7 +56,7 @@ const Hero = () => {
           transition={{ duration: 0.8, delay: 0.4 }}
         >
           <p className="text-xl sm:text-2xl md:text-3xl text-white/90 mb-12 font-light">
-            Psicologo • Scienziato cognitivo • Filosofo della mente • Ipnologo
+            {heroContent.subtitle}
           </p>
         </motion.div>
 
