@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
 import { useContent, type ContattiContent } from "@/hooks/useContent";
-import { Mail, Instagram, Facebook } from "lucide-react";
+import { Mail, Instagram, Facebook, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Contatti = () => {
@@ -87,6 +87,27 @@ const Contatti = () => {
                     <div>
                       <p className="font-semibold text-foreground">Facebook</p>
                       <p className="text-muted-foreground">{contattiContent.facebook}</p>
+                    </div>
+                  </Button>
+                </motion.div>
+              )}
+
+              {contattiContent.whatsapp && contattiContent.whatsappUrl && (
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
+                  transition={{ duration: 0.6, delay: 0.8 }}
+                >
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="w-full justify-start text-left hover:bg-primary/5 hover:border-primary transition-all duration-300"
+                    onClick={() => window.open(contattiContent.whatsappUrl, "_blank")}
+                  >
+                    <Phone className="mr-3 text-primary" size={24} />
+                    <div>
+                      <p className="font-semibold text-foreground">WhatsApp</p>
+                      <p className="text-muted-foreground">{contattiContent.whatsapp}</p>
                     </div>
                   </Button>
                 </motion.div>
