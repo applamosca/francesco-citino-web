@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useContent, type ContattiContent } from "@/hooks/useContent";
 import { Mail, Instagram, Facebook, Phone, Eye } from "lucide-react";
 import { useVisitCounter } from "@/hooks/useVisitCounter";
+import { motion } from "framer-motion";
 
 const Footer = () => {
   const { data: content } = useContent("contatti");
@@ -24,12 +25,35 @@ const Footer = () => {
             Seguimi sui social per aggiornamenti e contenuti
           </p>
 
-          {/* Visit Counter */}
+          {/* Visit Counter with Animation */}
           {!isLoading && totalVisits > 0 && (
-            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground/70">
-              <Eye size={14} />
-              <span>{totalVisits.toLocaleString()} visite</span>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="flex items-center justify-center gap-2 text-xs text-muted-foreground/70"
+            >
+              <motion.div
+                animate={{ 
+                  scale: [1, 1.2, 1],
+                  opacity: [0.7, 1, 0.7]
+                }}
+                transition={{ 
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                <Eye size={14} />
+              </motion.div>
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+              >
+                {totalVisits.toLocaleString()} visite
+              </motion.span>
+            </motion.div>
           )}
 
           {/* Social Media Icons */}
