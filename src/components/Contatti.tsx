@@ -54,12 +54,12 @@ const Contatti = () => {
                   variant="outline"
                   size="lg"
                   className="w-full justify-start text-left hover:bg-primary/5 hover:border-primary transition-all duration-300"
-                  onClick={() => window.open("https://instagram.com/francescocitino_recherche", "_blank")}
+                  onClick={() => window.open("https://www.instagram.com/francescocitino_s.f/", "_blank")}
                 >
                   <Instagram className="mr-3 text-primary" size={24} />
                   <div>
                     <p className="font-semibold text-foreground">Instagram</p>
-                    <p className="text-muted-foreground">@francescocitino_recherche</p>
+                    <p className="text-muted-foreground">@francescocitino_s.f</p>
                   </div>
                 </Button>
               </motion.div>
