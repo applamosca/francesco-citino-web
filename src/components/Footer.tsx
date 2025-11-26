@@ -31,12 +31,12 @@ const Footer = () => {
                 href={`mailto:${contattiContent.email}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group hover:scale-110 transition-all duration-300"
+                className="group hover:scale-125 transition-all duration-300"
                 aria-label="Email"
               >
                 <Mail 
                   size={18} 
-                  className="md:w-5 md:h-5 opacity-80 group-hover:opacity-100 transition-all duration-300 group-hover:rotate-12" 
+                  className="md:w-5 md:h-5 text-primary-foreground opacity-80 group-hover:opacity-100 transition-all duration-300 group-hover:rotate-12" 
                 />
               </a>
               {contattiContent.instagramUrl && (
@@ -44,16 +44,12 @@ const Footer = () => {
                   href={contattiContent.instagramUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group hover:scale-110 transition-all duration-300"
+                  className="group hover:scale-125 transition-all duration-300"
                   aria-label="Instagram"
                 >
                   <Instagram 
                     size={18}
-                    className="md:w-5 md:h-5 opacity-90 group-hover:opacity-100 transition-all duration-300 group-hover:rotate-12"
-                    style={{ 
-                      color: '#E4405F',
-                      filter: 'drop-shadow(0 0 2px rgba(228, 64, 95, 0.5))'
-                    }} 
+                    className="md:w-5 md:h-5 text-primary-foreground opacity-80 group-hover:opacity-100 transition-all duration-300 group-hover:rotate-12"
                   />
                 </a>
               )}
@@ -62,16 +58,12 @@ const Footer = () => {
                   href={contattiContent.facebookUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group hover:scale-110 transition-all duration-300"
+                  className="group hover:scale-125 transition-all duration-300"
                   aria-label="Facebook"
                 >
                   <Facebook 
                     size={18}
-                    className="md:w-5 md:h-5 opacity-90 group-hover:opacity-100 transition-all duration-300 group-hover:-rotate-12"
-                    style={{ 
-                      color: '#1877F2',
-                      filter: 'drop-shadow(0 0 2px rgba(24, 119, 242, 0.5))'
-                    }} 
+                    className="md:w-5 md:h-5 text-primary-foreground opacity-80 group-hover:opacity-100 transition-all duration-300 group-hover:-rotate-12"
                   />
                 </a>
               )}
@@ -80,16 +72,12 @@ const Footer = () => {
                   href={contattiContent.whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group hover:scale-110 transition-all duration-300"
+                  className="group hover:scale-125 transition-all duration-300"
                   aria-label="WhatsApp"
                 >
                   <Phone 
                     size={18}
-                    className="md:w-5 md:h-5 opacity-90 group-hover:opacity-100 transition-all duration-300 group-hover:rotate-12"
-                    style={{ 
-                      color: '#25D366',
-                      filter: 'drop-shadow(0 0 2px rgba(37, 211, 102, 0.5))'
-                    }} 
+                    className="md:w-5 md:h-5 text-primary-foreground opacity-80 group-hover:opacity-100 transition-all duration-300 group-hover:rotate-12"
                   />
                 </a>
               )}
