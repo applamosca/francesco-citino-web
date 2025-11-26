@@ -1,10 +1,17 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
+import { useContent, type ChiSonoContent } from "@/hooks/useContent";
 
 const ChiSono = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { data: content, isLoading } = useContent("chi_sono");
+  const chiSonoContent = content as unknown as ChiSonoContent;
+
+  if (isLoading || !chiSonoContent) {
+    return <section id="chi-sono" className="py-20 md:py-32 bg-bg-soft" ref={ref} />;
+  }
 
   return (
     <section id="chi-sono" className="py-20 md:py-32 bg-bg-soft" ref={ref}>
@@ -21,10 +28,7 @@ const ChiSono = () => {
           
           <div className="bg-card rounded-2xl shadow-lg p-8 md:p-12">
             <p className="text-lg md:text-xl text-foreground leading-relaxed mb-6">
-              Mi occupo prevalentemente di crescita personale, con una formazione multidisciplinare 
-              che abbraccia diversi ambiti del sapere. Oltre alla laurea in Psicologia, sono laureato 
-              in Scienze Cognitive, diplomato Ipnologo presso la scuola "Psicotecnica" di Milano e 
-              laureato in Filosofie d'Oriente e d'Occidente presso l'Università L'Orientale di Napoli.
+              {chiSonoContent.mainText}
             </p>
             
             <motion.div
@@ -36,35 +40,28 @@ const ChiSono = () => {
               <div>
                 <h3 className="text-xl font-semibold text-primary mb-4">Il mio approccio</h3>
                 <p className="text-base md:text-lg text-muted-foreground mb-4">
-                  Il mio lavoro si fonda su un approccio integrato e innovativo che unisce:
+                  {chiSonoContent.approachText}
                 </p>
                 <ul className="space-y-2 text-base md:text-lg text-muted-foreground ml-4">
-                  <li>• <strong>Psicologia Positiva</strong> per valorizzare le risorse e i punti di forza</li>
-                  <li>• <strong>Psicologia Transpersonale</strong> per esplorare le dimensioni più profonde dell'essere</li>
-                  <li>• <strong>Scienze Cognitive</strong> per comprendere i meccanismi della mente</li>
-                  <li>• <strong>Ipnosi</strong> come strumento di apprendimento</li>
-                  <li>• <strong>Filosofie Orientali</strong> come metodi di trasformazione e di crescita</li>
+                  {chiSonoContent.approaches.map((approach: string, index: number) => (
+                    <li key={index}>• <strong>{approach.split(" ")[0]} {approach.split(" ")[1]}</strong> {approach.split(" ").slice(2).join(" ")}</li>
+                  ))}
                 </ul>
               </div>
 
               <div className="pt-6 border-t border-border">
                 <p className="text-base md:text-lg text-muted-foreground mb-4">
-                  Opero sullo sviluppo del potenziale umano, accompagnando le persone in un percorso 
-                  di crescita che mira a:
+                  {chiSonoContent.goalText}
                 </p>
                 <ul className="space-y-2 text-base md:text-lg text-muted-foreground ml-4">
-                  <li>• <strong>Migliorare la consapevolezza di sé</strong> attraverso tecniche di auto-osservazione</li>
-                  <li>• <strong>Potenziare l'autostima</strong> riconoscendo e valorizzando le proprie qualità</li>
-                  <li>• <strong>Aumentare la fiducia in sé stessi</strong> superando blocchi e limitazioni</li>
-                  <li>• <strong>Ottimizzare le performance</strong> in ambito personale e professionale</li>
+                  {chiSonoContent.goals.map((goal: string, index: number) => (
+                    <li key={index}>• <strong>{goal.split(" ").slice(0, 4).join(" ")}</strong> {goal.split(" ").slice(4).join(" ")}</li>
+                  ))}
                 </ul>
               </div>
 
               <p className="text-base md:text-lg text-muted-foreground pt-6 italic">
-                Credo fermamente che ogni persona possieda in sé le risorse necessarie per realizzare 
-                il proprio potenziale. Il mio ruolo è quello di facilitare questo processo di scoperta 
-                e crescita, creando uno spazio sicuro dove esplorare nuove possibilità e sviluppare una 
-                maggiore armonia interiore.
+                {chiSonoContent.closingText}
               </p>
             </motion.div>
           </div>

@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const Footer = () => {
   return (
     <footer className="bg-primary text-primary-foreground py-8">
@@ -9,6 +11,12 @@ const Footer = () => {
           <p className="text-xs md:text-sm opacity-80">
             Psicologo • Ricercatore • Autore
           </p>
+          <Link 
+            to="/admin" 
+            className="inline-block mt-4 text-xs opacity-50 hover:opacity-100 transition-opacity"
+          >
+            Admin
+          </Link>
         </div>
       </div>
     </footer>

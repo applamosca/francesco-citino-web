@@ -3,28 +3,23 @@ import { useInView } from "framer-motion";
 import { useRef } from "react";
 import { Brain, BookOpen, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useContent, type ServiziContent, type ServiceItem } from "@/hooks/useContent";
 
-const servizi = [
-  {
-    icon: Brain,
-    title: "Consulenza Psicologica",
-    description: "Percorsi individuali di sostegno psicologico per la crescita personale e il benessere emotivo.",
-  },
-  {
-    icon: BookOpen,
-    title: "Ricerca e Formazione",
-    description: "Attività di ricerca nel campo della psicosintesi e formazione per professionisti del settore.",
-  },
-  {
-    icon: Users,
-    title: "Supervisione Professionale",
-    description: "Supervisione e consulenza per psicologi e professionisti della relazione d'aiuto.",
-  },
-];
+const iconMap = {
+  Brain,
+  BookOpen,
+  Users,
+};
 
 const Servizi = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { data: content, isLoading } = useContent("servizi");
+  const serviziContent = content as unknown as ServiziContent;
+
+  if (isLoading || !serviziContent) {
+    return <section id="servizi" className="py-20 md:py-32 bg-background" ref={ref} />;
+  }
 
   return (
     <section id="servizi" className="py-20 md:py-32 bg-background" ref={ref}>
@@ -39,8 +34,8 @@ const Servizi = () => {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {servizi.map((servizio, index) => {
-              const Icon = servizio.icon;
+            {serviziContent.services.map((servizio: ServiceItem, index: number) => {
+              const Icon = iconMap[servizio.icon as keyof typeof iconMap] || Brain;
               return (
                 <motion.div
                   key={servizio.title}

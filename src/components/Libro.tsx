@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
+import { useContent, type LibroContent } from "@/hooks/useContent";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 import bookCover from "@/assets/book-cover.jpg";
@@ -8,6 +9,12 @@ import bookCover from "@/assets/book-cover.jpg";
 const Libro = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { data: content, isLoading } = useContent("libro");
+  const libroContent = content as unknown as LibroContent;
+
+  if (isLoading || !libroContent) {
+    return <section id="libro" className="py-20 md:py-32 bg-bg-soft" ref={ref} />;
+  }
 
   return (
     <section id="libro" className="py-20 md:py-32 bg-bg-soft" ref={ref}>
@@ -18,7 +25,7 @@ const Libro = () => {
           transition={{ duration: 0.8 }}
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-12 text-center">
-            Il Libro: Filosofia dell'Azione
+            Il Libro: {libroContent.title}
           </h2>
 
           <div className="max-w-5xl mx-auto bg-card rounded-2xl shadow-xl overflow-hidden">
@@ -31,7 +38,7 @@ const Libro = () => {
               >
                 <img
                   src={bookCover}
-                  alt="Copertina del libro Filosofia dell'Azione"
+                  alt={`Copertina del libro ${libroContent.title}`}
                   className="max-w-full h-auto rounded-lg shadow-2xl"
                 />
               </motion.div>
@@ -43,28 +50,27 @@ const Libro = () => {
                 className="flex flex-col justify-center"
               >
                 <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
-                  Un'esplorazione profonda della coscienza e della volontà
+                  {libroContent.subtitle}
                 </h3>
                 
                 <p className="text-base md:text-lg text-muted-foreground mb-6 leading-relaxed">
-                  "Filosofia dell'Azione" rappresenta il culmine di oltre vent'anni di ricerca 
-                  nel campo della psicosintesi e della psicologia analitica. Un viaggio attraverso 
-                  i meccanismi della volontà e i processi di trasformazione personale.
+                  {libroContent.description}
                 </p>
 
                 <p className="text-base md:text-lg text-muted-foreground mb-8 leading-relaxed">
-                  Il libro integra prospettive filosofiche, psicologiche e spirituali per offrire 
-                  strumenti concreti di crescita e consapevolezza.
+                  {libroContent.secondDescription}
                 </p>
 
-                <Button
-                  size="lg"
-                  className="bg-primary hover:bg-accent text-primary-foreground w-full md:w-auto"
-                  onClick={() => window.open("#", "_blank")}
-                >
-                  Acquista Ora
-                  <ExternalLink className="ml-2" size={20} />
-                </Button>
+                {libroContent.purchaseUrl && libroContent.purchaseUrl !== "#" && (
+                  <Button
+                    size="lg"
+                    className="bg-primary hover:bg-accent text-primary-foreground w-full md:w-auto"
+                    onClick={() => window.open(libroContent.purchaseUrl, "_blank")}
+                  >
+                    Acquista Ora
+                    <ExternalLink className="ml-2" size={20} />
+                  </Button>
+                )}
               </motion.div>
             </div>
           </div>
