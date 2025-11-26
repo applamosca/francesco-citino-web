@@ -42,6 +42,8 @@ export interface ContattiContent {
   email: string;
   instagram: string;
   instagramUrl: string;
+  facebook?: string;
+  facebookUrl?: string;
 }
 
 export const useContent = (section: string) => {
