@@ -53,6 +53,10 @@ const Admin = () => {
     email: "",
     instagram: "",
     instagramUrl: "",
+    facebook: "",
+    facebookUrl: "",
+    whatsapp: "",
+    whatsappUrl: "",
   });
 
   const updateContentMutation = useUpdateContent();
@@ -544,6 +548,42 @@ const Admin = () => {
                 value={contattiForm.instagramUrl}
                 onChange={(e) => setContattiForm({ ...contattiForm, instagramUrl: e.target.value })}
                 placeholder="https://instagram.com/..."
+              />
+            </div>
+            <div>
+              <Label htmlFor="contatti-facebook">Facebook Nome Pagina</Label>
+              <Input
+                id="contatti-facebook"
+                value={contattiForm.facebook || ""}
+                onChange={(e) => setContattiForm({ ...contattiForm, facebook: e.target.value })}
+                placeholder="Nome pagina Facebook"
+              />
+            </div>
+            <div>
+              <Label htmlFor="contatti-facebook-url">Facebook URL</Label>
+              <Input
+                id="contatti-facebook-url"
+                value={contattiForm.facebookUrl || ""}
+                onChange={(e) => setContattiForm({ ...contattiForm, facebookUrl: e.target.value })}
+                placeholder="https://facebook.com/..."
+              />
+            </div>
+            <div>
+              <Label htmlFor="contatti-whatsapp">WhatsApp Numero</Label>
+              <Input
+                id="contatti-whatsapp"
+                value={contattiForm.whatsapp || ""}
+                onChange={(e) => setContattiForm({ ...contattiForm, whatsapp: e.target.value })}
+                placeholder="+39 123 456 7890"
+              />
+            </div>
+            <div>
+              <Label htmlFor="contatti-whatsapp-url">WhatsApp URL</Label>
+              <Input
+                id="contatti-whatsapp-url"
+                value={contattiForm.whatsappUrl || ""}
+                onChange={(e) => setContattiForm({ ...contattiForm, whatsappUrl: e.target.value })}
+                placeholder="https://wa.me/..."
               />
             </div>
             <Button onClick={() => handleSave("contatti", contattiForm)} disabled={updateContentMutation.isPending}>
