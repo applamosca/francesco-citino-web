@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroBg from "@/assets/hero-geometric-pattern.jpg";
+import heroBg from "@/assets/hero-francesco.jpg";
 import { useContent, type HeroContent } from "@/hooks/useContent";
 
 const Hero = () => {
@@ -34,7 +34,7 @@ const Hero = () => {
       id="hero"
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
       style={{
-        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.85)), url(${heroBg})`,
+        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.15)), url(${heroBg})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}

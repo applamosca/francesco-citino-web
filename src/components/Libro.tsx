@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { useContent, type LibroContent } from "@/hooks/useContent";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, CheckCircle2, Users, Lightbulb, BookOpen } from "lucide-react";
-import bookCover from "@/assets/book-cover.jpg";
+import bookCover from "@/assets/libro-cover.jpg";
 
 const Libro = () => {
   const ref = useRef(null);
