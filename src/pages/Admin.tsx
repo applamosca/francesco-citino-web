@@ -1,23 +1,21 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Lock, Save, Eye, EyeOff, LogOut, Plus, Trash2 } from "lucide-react";
+import { Lock, Save, LogOut, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { useContent, useUpdateContent } from "@/hooks/useContent";
 import type { HeroContent, ChiSonoContent, ServiziContent, LibroContent, ContattiContent, ServiceItem } from "@/hooks/useContent";
 
 const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [adminPassword, setAdminPassword] = useState(""); // Store password for updates
+  const { session, isAdmin } = useAuth();
 
   // Content queries
   const { data: heroContent } = useContent("hero");
@@ -61,15 +59,24 @@ const Admin = () => {
 
   const updateContentMutation = useUpdateContent();
 
-  // Check authentication from sessionStorage
+  // Redirect if not authenticated or not admin
   useEffect(() => {
-    const auth = sessionStorage.getItem("admin_authenticated");
-    const storedPassword = sessionStorage.getItem("admin_password");
-    if (auth === "true" && storedPassword) {
-      setIsAuthenticated(true);
-      setAdminPassword(storedPassword);
+    if (!session) {
+      toast({
+        title: "Accesso negato",
+        description: "Devi effettuare il login",
+        variant: "destructive",
+      });
+      navigate("/auth");
+    } else if (!isAdmin) {
+      toast({
+        title: "Accesso negato",
+        description: "Non hai i permessi per accedere a questa pagina",
+        variant: "destructive",
+      });
+      navigate("/");
     }
-  }, []);
+  }, [session, isAdmin, navigate, toast]);
 
   // Populate forms when data loads
   useEffect(() => {
@@ -80,44 +87,26 @@ const Admin = () => {
     if (contattiContent) setContattiForm(contattiContent as unknown as ContattiContent);
   }, [heroContent, chiSonoContent, serviziContent, libroContent, contattiContent]);
 
-  const handleLogin = () => {
-    // Simple password check: 'psico2025'
-    if (password === "psico2025") {
-      setIsAuthenticated(true);
-      setAdminPassword(password);
-      sessionStorage.setItem("admin_authenticated", "true");
-      sessionStorage.setItem("admin_password", password);
-      toast({
-        title: "Accesso consentito",
-        description: "Benvenuto nel pannello admin",
-      });
-    } else {
-      toast({
-        title: "Password errata",
-        description: "Riprova",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setAdminPassword("");
-    sessionStorage.removeItem("admin_authenticated");
-    sessionStorage.removeItem("admin_password");
-    setPassword("");
-    toast({
-      title: "Disconnesso",
-      description: "Hai effettuato il logout",
-    });
+  const handleLogout = async () => {
+    navigate("/");
   };
 
   const handleSave = async (section: string, content: any) => {
+    if (!session) {
+      toast({
+        title: "Errore",
+        description: "Sessione scaduta. Effettua nuovamente il login.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
     try {
       await updateContentMutation.mutateAsync({ 
         section, 
         content,
-        password: adminPassword,
+        password: "", // Password no longer needed
       });
       toast({
         title: "Salvato!",
@@ -133,7 +122,8 @@ const Admin = () => {
     }
   };
 
-  if (!isAuthenticated) {
+  // Show loading while checking auth
+  if (!session || !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10 px-4">
         <motion.div
@@ -146,44 +136,9 @@ const Admin = () => {
               <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                 <Lock className="text-primary" size={24} />
               </div>
-              <CardTitle className="text-2xl">Admin Panel</CardTitle>
-              <CardDescription>Inserisci la password per accedere</CardDescription>
+              <CardTitle className="text-2xl">Verifica autenticazione...</CardTitle>
+              <CardDescription>Reindirizzamento in corso</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      onKeyPress={(e) => e.key === "Enter" && handleLogin()}
-                      placeholder="Inserisci password"
-                      className="pr-10"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </div>
-                <Button onClick={handleLogin} className="w-full">
-                  Accedi
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => navigate("/")}
-                  className="w-full"
-                >
-                  Torna al sito
-                </Button>
-              </div>
-            </CardContent>
           </Card>
         </motion.div>
       </div>

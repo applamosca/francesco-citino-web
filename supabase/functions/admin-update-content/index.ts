@@ -13,60 +13,69 @@ serve(async (req) => {
   }
 
   try {
-    // Parse request body safely
-    let requestData;
-    try {
-      requestData = await req.json();
-    } catch (jsonError) {
-      console.log('Invalid or empty JSON body');
+    // Get auth header
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.log('Missing authorization header');
       return new Response(
-        JSON.stringify({ error: 'Invalid JSON body' }), 
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const { password, section, content } = requestData;
+    // Create authenticated Supabase client
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: { headers: { Authorization: authHeader } },
+        auth: { persistSession: false }
+      }
+    );
 
-    console.log('Admin update request received for section:', section);
-
-    // Validate input
-    if (!password || !section || !content) {
+    // Verify user is authenticated and has admin role
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      console.error('Auth error:', userError);
       return new Response(
-        JSON.stringify({ error: 'Missing required fields' }), 
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        JSON.stringify({ error: 'Unauthorized: Invalid token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Create Supabase client with service role key for admin operations
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    console.log('User authenticated:', user.email);
+
+    // Check admin role
+    const { data: roles, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .maybeSingle();
+
+    if (roleError || !roles) {
+      console.error('Role check error:', roleError);
+      return new Response(
+        JSON.stringify({ error: 'Forbidden: Admin access required' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Admin role verified');
+
+    // Parse request body
+    const { section, content } = await req.json();
     
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    console.log('Received update request for section:', section, 'from admin:', user.email);
 
-    // Verify admin password (simple comparison for demo - use hash in production)
-    const correctPassword = 'psico2025';
-    
-    if (password !== correctPassword) {
-      console.log('Invalid password attempt');
-      return new Response(
-        JSON.stringify({ error: 'Password non valida' }), 
-        { 
-          status: 401, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
+    // Use service role key for the actual update (bypasses RLS)
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
 
-    console.log('Password verified, updating content...');
-
-    // Update content with service role (bypasses RLS)
-    const { data, error } = await supabase
+    // Update the content
+    const { data, error } = await supabaseAdmin
       .from('site_content')
       .update({ content, updated_at: new Date().toISOString() })
       .eq('section', section)

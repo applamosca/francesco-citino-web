@@ -12,29 +12,59 @@ serve(async (req) => {
   }
 
   try {
+    // Get auth header
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Create authenticated Supabase client
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: { headers: { Authorization: authHeader } },
+        auth: { persistSession: false }
+      }
+    );
+
+    // Verify user is authenticated and has admin role
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      console.error('Auth error:', userError);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized: Invalid token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check admin role
+    const { data: roles, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .maybeSingle();
+
+    if (roleError || !roles) {
+      console.error('Role check error:', roleError);
+      return new Response(
+        JSON.stringify({ error: 'Forbidden: Admin access required' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { action, data } = await req.json();
+    console.log('Admin action:', action, 'by:', user.email);
+
+    // Use service role key for database operations
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
-
-    const { action, password, data } = await req.json();
-    
-    console.log('Blog admin action:', action);
-
-    // Verify admin password
-    const { data: adminData } = await supabaseAdmin
-      .from('admin_settings')
-      .select('setting_value')
-      .eq('setting_key', 'admin_password')
-      .single();
-
-    if (!adminData || adminData.setting_value !== password) {
-      console.error('Invalid password attempt');
-      return new Response(
-        JSON.stringify({ error: 'Password non valida' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
 
     let result;
 

@@ -78,12 +78,20 @@ export const useUpdateContent = () => {
       content: any; 
       password: string;
     }) => {
-      // Call secure edge function instead of direct update
+      // Get the current session for authentication
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
+
+      // Call secure edge function with JWT authentication
       const { data, error } = await supabase.functions.invoke('admin-update-content', {
         body: {
           section,
           content,
-          password,
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
         },
       });
 
