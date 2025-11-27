@@ -1,37 +1,13 @@
 import { motion } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { useRef } from "react";
 import { useContent, type ContattiContent } from "@/hooks/useContent";
 import { Mail, MapPin, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 
 const Contatti = () => {
   const ref = useRef(null);
-  const mapRef = useRef<HTMLDivElement>(null);
-  const [isMapVisible, setIsMapVisible] = useState(false);
   const { data: content, isLoading } = useContent("contatti");
   const contattiContent = content as unknown as ContattiContent;
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsMapVisible(true);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (mapRef.current) {
-      observer.observe(mapRef.current);
-    }
-
-    return () => {
-      if (mapRef.current) {
-        observer.unobserve(mapRef.current);
-      }
-    };
-  }, []);
 
   if (isLoading || !contattiContent) {
     return <section id="contatti" className="min-h-screen flex items-center justify-center bg-background" ref={ref} />;
@@ -124,23 +100,16 @@ const Contatti = () => {
               </h3>
             </div>
 
-            <div ref={mapRef} className="relative w-full overflow-hidden rounded-3xl shadow-xl">
+            <div className="relative w-full overflow-hidden rounded-3xl shadow-xl">
               <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-                {!isMapVisible ? (
-                  <div className="absolute inset-0 flex items-center justify-center bg-muted">
-                    <Skeleton className="w-full h-full" />
-                    <p className="absolute text-muted-foreground text-sm">Caricamento mappa...</p>
-                  </div>
-                ) : (
-                  <iframe
-                    src="https://www.google.com/maps?q=Via+Andria,+52,+76121+Barletta+BT,+Italia&output=embed"
-                    className="absolute inset-0 w-full h-full border-0"
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    title="Mappa Studio Francesco Citino"
-                    aria-label="Mappa della posizione dello studio a Barletta"
-                  />
-                )}
+                <iframe
+                  src="https://www.google.com/maps?q=Via+Andria,+52,+76121+Barletta+BT,+Italia&output=embed"
+                  className="absolute inset-0 w-full h-full border-0"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Mappa Studio Francesco Citino"
+                  aria-label="Mappa della posizione dello studio a Barletta"
+                />
               </div>
             </div>
 
