@@ -1,6 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import ChiSono from "@/components/ChiSono";
+import ChiSono from "@/components/ChiSonoNew";
 import Servizi from "@/components/Servizi";
 import Libro from "@/components/Libro";
 import Contatti from "@/components/Contatti";

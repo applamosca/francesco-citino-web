@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroBg from "@/assets/hero-bg.jpg";
+import heroBg from "@/assets/hero-geometric-pattern.jpg";
 import { useContent, type HeroContent } from "@/hooks/useContent";
 
 const Hero = () => {
@@ -34,7 +34,7 @@ const Hero = () => {
       id="hero"
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
       style={{
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${heroBg})`,
+        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.85)), url(${heroBg})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
@@ -45,7 +45,7 @@ const Hero = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-primary mb-6">
             {heroContent.title}
           </h1>
         </motion.div>
@@ -55,7 +55,7 @@ const Hero = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
         >
-          <p className="text-xl sm:text-2xl md:text-3xl text-white/90 mb-12 font-light">
+          <p className="text-xl sm:text-2xl md:text-3xl text-foreground/80 mb-12 font-light">
             {heroContent.subtitle}
           </p>
         </motion.div>
@@ -81,7 +81,7 @@ const Hero = () => {
         transition={{ duration: 1, delay: 1 }}
         className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
       >
-        <ChevronDown className="text-white animate-bounce" size={32} />
+        <ChevronDown className="text-primary animate-bounce" size={32} />
       </motion.div>
     </section>
   );
