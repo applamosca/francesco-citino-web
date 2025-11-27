@@ -17,32 +17,32 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 220 15% 25%;
 
-    --primary: 240 60% 45%;
+    --primary: 45 85% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 20% 95%;
+    --secondary: 45 30% 95%;
     --secondary-foreground: 220 15% 25%;
 
-    --muted: 210 20% 96%;
+    --muted: 45 20% 96%;
     --muted-foreground: 220 10% 50%;
 
-    --accent: 210 70% 55%;
+    --accent: 35 80% 60%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 240 60% 45%;
+    --border: 45 20% 85%;
+    --input: 45 20% 85%;
+    --ring: 45 85% 55%;
 
     --radius: 0.75rem;
 
     /* Custom design tokens */
-    --hero-gradient-from: 240 60% 45%;
-    --hero-gradient-to: 210 70% 55%;
+    --hero-gradient-from: 45 85% 55%;
+    --hero-gradient-to: 35 80% 60%;
     --text-soft: 220 10% 50%;
-    --bg-soft: 210 30% 98%;
+    --bg-soft: 45 30% 98%;
     
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -57,7 +57,7 @@ All colors MUST be HSL.
     --popover: 220 20% 12%;
     --popover-foreground: 210 20% 95%;
 
-    --primary: 240 60% 55%;
+    --primary: 45 85% 65%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 220 15% 18%;
@@ -66,7 +66,7 @@ All colors MUST be HSL.
     --muted: 220 15% 18%;
     --muted-foreground: 220 10% 60%;
 
-    --accent: 210 70% 60%;
+    --accent: 35 80% 65%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;
@@ -74,7 +74,7 @@ All colors MUST be HSL.
 
     --border: 220 15% 20%;
     --input: 220 15% 20%;
-    --ring: 240 60% 55%;
+    --ring: 45 85% 65%;
   }
 }
 

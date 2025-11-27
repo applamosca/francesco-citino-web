@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
-import francescoProfile from "@/assets/francesco-profile.jpg";
+import francescoProfile from "@/assets/francesco-trajinera.jpg";
 import { useContent, type ChiSonoContent } from "@/hooks/useContent";
 
 const ChiSonoNew = () => {
