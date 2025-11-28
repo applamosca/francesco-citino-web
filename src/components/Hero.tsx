@@ -25,7 +25,15 @@ const Hero = () => {
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
-      />
+      >
+        <div className="container mx-auto px-4 text-center z-10">
+          <div className="animate-pulse">
+            <div className="h-12 bg-primary/20 rounded-lg w-3/4 mx-auto mb-6" />
+            <div className="h-8 bg-primary/10 rounded-lg w-1/2 mx-auto mb-4" />
+            <div className="h-4 bg-primary/10 rounded-lg w-1/3 mx-auto" />
+          </div>
+        </div>
+      </section>
     );
   }
 
