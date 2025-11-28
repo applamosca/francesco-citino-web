@@ -10,7 +10,24 @@ const Contatti = () => {
   const contattiContent = content as unknown as ContattiContent;
 
   if (isLoading || !contattiContent) {
-    return <section id="contatti" className="min-h-screen flex items-center justify-center bg-background" ref={ref} />;
+    return (
+      <section id="contatti" className="min-h-screen flex items-center justify-center bg-background py-20" ref={ref}>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl mx-auto space-y-12">
+            <div className="h-12 bg-primary/20 rounded-lg w-1/3 mx-auto mb-8 animate-pulse" />
+            <div className="bg-card rounded-2xl shadow-lg p-8 md:p-12">
+              <div className="space-y-4 animate-pulse">
+                <div className="h-6 bg-muted/30 rounded w-3/4 mx-auto" />
+                <div className="h-16 bg-muted/20 rounded-lg" />
+              </div>
+            </div>
+            <div className="bg-card rounded-2xl shadow-lg p-8 md:p-12">
+              <div className="aspect-video bg-muted/30 rounded-3xl animate-pulse" />
+            </div>
+          </div>
+        </div>
+      </section>
+    );
   }
 
   const studioAddress = {
