@@ -13,7 +13,25 @@ const Libro = () => {
   const libroContent = content as unknown as LibroContent;
 
   if (isLoading || !libroContent) {
-    return <section id="libro" className="py-20 md:py-32 bg-bg-soft" ref={ref} />;
+    return (
+      <section id="libro" className="py-20 md:py-32 bg-bg-soft" ref={ref}>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="h-12 bg-primary/20 rounded-lg w-2/5 mx-auto mb-4 animate-pulse" />
+          <div className="h-8 bg-accent/10 rounded-lg w-3/5 mx-auto mb-12 animate-pulse" />
+          <div className="max-w-6xl mx-auto bg-card rounded-2xl shadow-xl p-8 md:p-12">
+            <div className="grid md:grid-cols-2 gap-8 md:gap-12">
+              <div className="aspect-[2/3] bg-muted/50 rounded-lg animate-pulse" />
+              <div className="space-y-4">
+                <div className="h-4 bg-muted/50 rounded w-full animate-pulse" />
+                <div className="h-4 bg-muted/50 rounded w-5/6 animate-pulse" />
+                <div className="h-4 bg-muted/50 rounded w-4/5 animate-pulse" />
+                <div className="h-12 bg-primary/20 rounded-lg w-1/2 mt-6 animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
   }
 
   return (

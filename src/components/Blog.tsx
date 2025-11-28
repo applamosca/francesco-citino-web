@@ -46,9 +46,28 @@ const Blog = () => {
     return (
       <section
         id="blog"
-        className="min-h-screen flex items-center justify-center bg-background"
+        className="min-h-screen py-20 px-4 bg-gradient-to-b from-background to-muted/20"
         ref={ref}
-      />
+      >
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="h-12 bg-primary/20 rounded-lg w-1/4 mx-auto mb-4 animate-pulse" />
+            <div className="h-6 bg-muted/30 rounded-lg w-1/2 mx-auto animate-pulse" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-card rounded-2xl overflow-hidden shadow-lg animate-pulse">
+                <div className="h-48 bg-muted/50" />
+                <div className="p-6 space-y-3">
+                  <div className="h-4 bg-muted/30 rounded w-1/3" />
+                  <div className="h-6 bg-muted/40 rounded w-full" />
+                  <div className="h-4 bg-muted/30 rounded w-5/6" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     );
   }
 

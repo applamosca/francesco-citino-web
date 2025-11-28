@@ -11,7 +11,24 @@ const ChiSonoNew = () => {
   const chiSonoContent = content as unknown as ChiSonoContent;
 
   if (isLoading || !chiSonoContent) {
-    return <section id="chi-sono" className="py-20 md:py-32 bg-muted/30" ref={ref} />;
+    return (
+      <section id="chi-sono" className="py-20 md:py-32 bg-muted/30" ref={ref}>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="h-12 bg-primary/20 rounded-lg w-1/3 mx-auto mb-16 animate-pulse" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+              <div className="aspect-[4/3] lg:aspect-[3/4] bg-muted/50 rounded-3xl animate-pulse" />
+              <div className="space-y-6">
+                <div className="h-8 bg-primary/10 rounded-lg w-2/3 animate-pulse" />
+                <div className="h-4 bg-muted/50 rounded w-full animate-pulse" />
+                <div className="h-4 bg-muted/50 rounded w-5/6 animate-pulse" />
+                <div className="h-4 bg-muted/50 rounded w-4/5 animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
   }
 
   return (
