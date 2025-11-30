@@ -35,6 +35,45 @@ export type Database = {
         }
         Relationships: []
       }
+      appointments: {
+        Row: {
+          created_at: string
+          email: string
+          google_calendar_event_id: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          preferred_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          google_calendar_event_id?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          preferred_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          google_calendar_event_id?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          preferred_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blog_article_tags: {
         Row: {
           article_id: string
@@ -199,6 +238,45 @@ export type Database = {
           id?: string
           name?: string
           slug?: string
+        }
+        Relationships: []
+      }
+      book_orders: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          paypal_transaction_id: string | null
+          phone: string | null
+          quantity: number
+          shipping_address: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          paypal_transaction_id?: string | null
+          phone?: string | null
+          quantity?: number
+          shipping_address: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          paypal_transaction_id?: string | null
+          phone?: string | null
+          quantity?: number
+          shipping_address?: string
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
