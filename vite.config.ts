@@ -4,6 +4,8 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
+const isGitHubActions = process.env.GITHUB_ACTIONS === "true";
+
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
@@ -15,5 +17,5 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  base: mode === "production" ? "/francesco-citino-web/" : "/",
+  base: isGitHubActions ? "/francesco-citino-web/" : "/",
 }));
