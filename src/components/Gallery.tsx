@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useRef } from "react";
+import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Camera, X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 
 interface GalleryPhoto {
   id: string;
@@ -14,6 +14,9 @@ interface GalleryPhoto {
 
 const Gallery = () => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const constraintsRef = useRef(null);
 
   const { data: photos, isLoading } = useQuery({
     queryKey: ["gallery-photos"],
@@ -29,25 +32,71 @@ const Gallery = () => {
     },
   });
 
-  const openLightbox = (index: number) => setSelectedIndex(index);
-  const closeLightbox = () => setSelectedIndex(null);
+  const openLightbox = (index: number) => {
+    setSelectedIndex(index);
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
+  };
+
+  const closeLightbox = () => {
+    setSelectedIndex(null);
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
+  };
 
   const goToPrevious = () => {
     if (selectedIndex !== null && photos) {
       setSelectedIndex(selectedIndex === 0 ? photos.length - 1 : selectedIndex - 1);
+      setZoom(1);
+      setPosition({ x: 0, y: 0 });
     }
   };
 
   const goToNext = () => {
     if (selectedIndex !== null && photos) {
       setSelectedIndex(selectedIndex === photos.length - 1 ? 0 : selectedIndex + 1);
+      setZoom(1);
+      setPosition({ x: 0, y: 0 });
     }
+  };
+
+  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.5, 4));
+  const handleZoomOut = () => {
+    setZoom((prev) => Math.max(prev - 0.5, 1));
+    if (zoom <= 1.5) setPosition({ x: 0, y: 0 });
+  };
+  const handleResetZoom = () => {
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") closeLightbox();
-    if (e.key === "ArrowLeft") goToPrevious();
-    if (e.key === "ArrowRight") goToNext();
+    if (e.key === "ArrowLeft" && zoom === 1) goToPrevious();
+    if (e.key === "ArrowRight" && zoom === 1) goToNext();
+    if (e.key === "+" || e.key === "=") handleZoomIn();
+    if (e.key === "-") handleZoomOut();
+    if (e.key === "0") handleResetZoom();
+  };
+
+  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    if (zoom > 1) return;
+    
+    const threshold = 100;
+    if (info.offset.x > threshold) {
+      goToPrevious();
+    } else if (info.offset.x < -threshold) {
+      goToNext();
+    }
+  };
+
+  const handleDoubleTap = () => {
+    if (zoom === 1) {
+      setZoom(2);
+    } else {
+      setZoom(1);
+      setPosition({ x: 0, y: 0 });
+    }
   };
 
   if (isLoading) {
@@ -185,13 +234,50 @@ const Gallery = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center"
-            onClick={closeLightbox}
+            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center touch-none"
+            onClick={zoom === 1 ? closeLightbox : undefined}
             onKeyDown={handleKeyDown}
             tabIndex={0}
             role="dialog"
             aria-modal="true"
+            ref={constraintsRef}
           >
+            {/* Top controls */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ delay: 0.2 }}
+              className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-black/50 backdrop-blur-sm rounded-full px-4 py-2"
+            >
+              <button
+                onClick={(e) => { e.stopPropagation(); handleZoomOut(); }}
+                disabled={zoom <= 1}
+                className="p-2 rounded-full hover:bg-white/10 text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Zoom out"
+              >
+                <ZoomOut className="w-5 h-5" />
+              </button>
+              <span className="text-white text-sm font-medium min-w-[3rem] text-center">
+                {Math.round(zoom * 100)}%
+              </span>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleZoomIn(); }}
+                disabled={zoom >= 4}
+                className="p-2 rounded-full hover:bg-white/10 text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Zoom in"
+              >
+                <ZoomIn className="w-5 h-5" />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleResetZoom(); }}
+                className="p-2 rounded-full hover:bg-white/10 text-white transition-colors"
+                aria-label="Reset zoom"
+              >
+                <RotateCcw className="w-5 h-5" />
+              </button>
+            </motion.div>
+
             {/* Close button */}
             <motion.button
               initial={{ opacity: 0, scale: 0.8 }}
@@ -205,32 +291,36 @@ const Gallery = () => {
               <X className="w-6 h-6" />
             </motion.button>
 
-            {/* Navigation buttons */}
-            <motion.button
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ delay: 0.2 }}
-              onClick={(e) => { e.stopPropagation(); goToPrevious(); }}
-              className="absolute left-4 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-              aria-label="Foto precedente"
-            >
-              <ChevronLeft className="w-8 h-8" />
-            </motion.button>
+            {/* Navigation buttons - hidden when zoomed */}
+            {zoom === 1 && (
+              <>
+                <motion.button
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ delay: 0.2 }}
+                  onClick={(e) => { e.stopPropagation(); goToPrevious(); }}
+                  className="absolute left-4 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors hidden md:block"
+                  aria-label="Foto precedente"
+                >
+                  <ChevronLeft className="w-8 h-8" />
+                </motion.button>
 
-            <motion.button
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ delay: 0.2 }}
-              onClick={(e) => { e.stopPropagation(); goToNext(); }}
-              className="absolute right-4 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-              aria-label="Foto successiva"
-            >
-              <ChevronRight className="w-8 h-8" />
-            </motion.button>
+                <motion.button
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ delay: 0.2 }}
+                  onClick={(e) => { e.stopPropagation(); goToNext(); }}
+                  className="absolute right-4 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors hidden md:block"
+                  aria-label="Foto successiva"
+                >
+                  <ChevronRight className="w-8 h-8" />
+                </motion.button>
+              </>
+            )}
 
-            {/* Image container */}
+            {/* Image container with swipe and zoom */}
             <motion.div
               key={selectedIndex}
               initial={{ opacity: 0, scale: 0.9 }}
@@ -240,11 +330,42 @@ const Gallery = () => {
               className="relative max-w-[90vw] max-h-[85vh] flex flex-col items-center"
               onClick={(e) => e.stopPropagation()}
             >
-              <img
-                src={photos[selectedIndex].image_url}
-                alt={photos[selectedIndex].title}
-                className="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl"
-              />
+              <motion.div
+                className="overflow-hidden rounded-lg"
+                style={{ cursor: zoom > 1 ? "grab" : "default" }}
+              >
+                <motion.img
+                  src={photos[selectedIndex].image_url}
+                  alt={photos[selectedIndex].title}
+                  className="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl select-none"
+                  drag={zoom > 1}
+                  dragConstraints={constraintsRef}
+                  dragElastic={0.1}
+                  onDragEnd={handleDragEnd}
+                  onDoubleClick={handleDoubleTap}
+                  animate={{
+                    scale: zoom,
+                    x: position.x,
+                    y: position.y,
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  style={{ touchAction: "none" }}
+                  whileDrag={{ cursor: "grabbing" }}
+                />
+              </motion.div>
+
+              {/* Swipe hint for mobile */}
+              {zoom === 1 && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="text-white/40 text-xs mt-2 md:hidden"
+                >
+                  Swipe per navigare • Doppio tap per zoom
+                </motion.p>
+              )}
+
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
