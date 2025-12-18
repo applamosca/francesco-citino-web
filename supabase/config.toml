@@ -2,3 +2,6 @@ project_id = "kyvantdstjjdufpptqni"
 
 [functions.admin-update-content]
 verify_jwt = false
+
+[functions.create-book-order]
+verify_jwt = false
