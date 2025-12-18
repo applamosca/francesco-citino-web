@@ -3,6 +3,7 @@ import Hero from "@/components/Hero";
 import ChiSono from "@/components/ChiSonoNew";
 import Servizi from "@/components/Servizi";
 import Blog from "@/components/Blog";
+import Gallery from "@/components/Gallery";
 import Libro from "@/components/Libro";
 import Contatti from "@/components/Contatti";
 import Footer from "@/components/Footer";
@@ -16,6 +17,7 @@ const Index = () => {
         <ChiSono />
         <Servizi />
         <Blog />
+        <Gallery />
         <Libro />
         <Contatti />
       </main>
