@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { LogOut, ArrowLeft, Plus, Trash2, Eye, EyeOff, GripVertical, Upload } from "lucide-react";
+import { motion, Reorder } from "framer-motion";
+import { LogOut, ArrowLeft, Plus, Trash2, Eye, EyeOff, GripVertical, Upload, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -36,6 +35,9 @@ const AdminGallery = () => {
   });
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [orderedPhotos, setOrderedPhotos] = useState<GalleryPhoto[]>([]);
+  const [hasOrderChanges, setHasOrderChanges] = useState(false);
+  const [savingOrder, setSavingOrder] = useState(false);
 
   const { data: photos, isLoading: photosLoading } = useQuery({
     queryKey: ["admin-gallery-photos"],
@@ -50,6 +52,13 @@ const AdminGallery = () => {
     },
     enabled: isAdmin,
   });
+
+  useEffect(() => {
+    if (photos) {
+      setOrderedPhotos(photos);
+      setHasOrderChanges(false);
+    }
+  }, [photos]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -138,7 +147,7 @@ const AdminGallery = () => {
         return;
       }
 
-      const maxOrder = photos?.reduce((max, p) => Math.max(max, p.display_order), 0) || 0;
+      const maxOrder = orderedPhotos.reduce((max, p) => Math.max(max, p.display_order), 0);
 
       const { error } = await supabase
         .from("gallery_photos")
@@ -171,6 +180,47 @@ const AdminGallery = () => {
     }
   };
 
+  const handleReorder = (newOrder: GalleryPhoto[]) => {
+    setOrderedPhotos(newOrder);
+    setHasOrderChanges(true);
+  };
+
+  const handleSaveOrder = async () => {
+    setSavingOrder(true);
+    try {
+      const updates = orderedPhotos.map((photo, index) => ({
+        id: photo.id,
+        display_order: index + 1,
+      }));
+
+      for (const update of updates) {
+        const { error } = await supabase
+          .from("gallery_photos")
+          .update({ display_order: update.display_order })
+          .eq("id", update.id);
+
+        if (error) throw error;
+      }
+
+      toast({
+        title: "Successo",
+        description: "Ordine delle foto salvato",
+      });
+
+      setHasOrderChanges(false);
+      queryClient.invalidateQueries({ queryKey: ["admin-gallery-photos"] });
+      queryClient.invalidateQueries({ queryKey: ["gallery-photos"] });
+    } catch (error: any) {
+      toast({
+        title: "Errore",
+        description: error.message || "Impossibile salvare l'ordine",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingOrder(false);
+    }
+  };
+
   const handleToggleVisibility = async (id: string, currentVisibility: boolean) => {
     try {
       const { error } = await supabase
@@ -179,6 +229,10 @@ const AdminGallery = () => {
         .eq("id", id);
 
       if (error) throw error;
+
+      setOrderedPhotos(prev => 
+        prev.map(p => p.id === id ? { ...p, is_visible: !currentVisibility } : p)
+      );
 
       queryClient.invalidateQueries({ queryKey: ["admin-gallery-photos"] });
       queryClient.invalidateQueries({ queryKey: ["gallery-photos"] });
@@ -207,6 +261,7 @@ const AdminGallery = () => {
         description: "Foto eliminata",
       });
 
+      setOrderedPhotos(prev => prev.filter(p => p.id !== id));
       queryClient.invalidateQueries({ queryKey: ["admin-gallery-photos"] });
       queryClient.invalidateQueries({ queryKey: ["gallery-photos"] });
     } catch (error: any) {
@@ -344,72 +399,100 @@ const AdminGallery = () => {
           </Card>
         </motion.div>
 
-        {/* Photos Grid */}
+        {/* Photos Grid with Drag and Drop */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           <Card>
-            <CardHeader>
-              <CardTitle>Foto nella Galleria ({photos?.length || 0})</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <GripVertical className="h-5 w-5" />
+                Foto nella Galleria ({orderedPhotos.length})
+              </CardTitle>
+              {hasOrderChanges && (
+                <Button onClick={handleSaveOrder} disabled={savingOrder}>
+                  {savingOrder ? (
+                    <>Salvataggio...</>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Salva Ordine
+                    </>
+                  )}
+                </Button>
+              )}
             </CardHeader>
             <CardContent>
+              {hasOrderChanges && (
+                <p className="text-sm text-amber-600 dark:text-amber-400 mb-4 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
+                  Hai modifiche non salvate. Trascina le foto per riordinarle e clicca "Salva Ordine".
+                </p>
+              )}
               {photosLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {[1, 2, 3].map((i) => (
                     <div key={i} className="aspect-square bg-muted rounded-lg animate-pulse" />
                   ))}
                 </div>
-              ) : photos && photos.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {photos.map((photo) => (
-                    <div
+              ) : orderedPhotos.length > 0 ? (
+                <Reorder.Group
+                  axis="y"
+                  values={orderedPhotos}
+                  onReorder={handleReorder}
+                  className="space-y-3"
+                >
+                  {orderedPhotos.map((photo) => (
+                    <Reorder.Item
                       key={photo.id}
-                      className={`relative group rounded-lg overflow-hidden border ${
-                        photo.is_visible ? 'border-border' : 'border-destructive/50 opacity-60'
-                      }`}
+                      value={photo}
+                      className={`flex items-center gap-4 p-3 rounded-lg border cursor-grab active:cursor-grabbing ${
+                        photo.is_visible 
+                          ? 'border-border bg-card hover:bg-accent/50' 
+                          : 'border-destructive/30 bg-destructive/5 opacity-70'
+                      } transition-colors`}
                     >
+                      <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                       <img
                         src={photo.image_url}
                         alt={photo.title}
-                        className="w-full aspect-square object-cover"
+                        className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
                       />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-4">
-                        <div>
-                          <h3 className="text-white font-bold">{photo.title}</h3>
-                          {photo.description && (
-                            <p className="text-white/80 text-sm mt-1 line-clamp-2">
-                              {photo.description}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-white hover:bg-white/20"
-                            onClick={() => handleToggleVisibility(photo.id, photo.is_visible)}
-                          >
-                            {photo.is_visible ? (
-                              <><Eye className="h-4 w-4 mr-1" /> Visibile</>
-                            ) : (
-                              <><EyeOff className="h-4 w-4 mr-1" /> Nascosta</>
-                            )}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-destructive hover:bg-destructive/20"
-                            onClick={() => handleDeletePhoto(photo.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-foreground truncate">{photo.title}</h3>
+                        {photo.description && (
+                          <p className="text-sm text-muted-foreground truncate">
+                            {photo.description}
+                          </p>
+                        )}
                       </div>
-                    </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleToggleVisibility(photo.id, photo.is_visible)}
+                          className={photo.is_visible ? "text-primary" : "text-muted-foreground"}
+                        >
+                          {photo.is_visible ? (
+                            <Eye className="h-4 w-4" />
+                          ) : (
+                            <EyeOff className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:bg-destructive/10"
+                          onClick={() => handleDeletePhoto(photo.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </Reorder.Item>
                   ))}
-                </div>
+                </Reorder.Group>
               ) : (
                 <p className="text-center text-muted-foreground py-8">
                   Nessuna foto nella galleria. Aggiungi la prima!
