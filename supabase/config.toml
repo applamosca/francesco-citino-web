@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.create-book-order]
 verify_jwt = false
+
+[functions.facebook-post]
+verify_jwt = false
