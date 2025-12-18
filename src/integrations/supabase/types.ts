@@ -354,6 +354,39 @@ export type Database = {
         }
         Relationships: []
       }
+      gallery_photos: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          image_url: string
+          is_visible: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url: string
+          is_visible?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string
+          is_visible?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -381,6 +414,45 @@ export type Database = {
           phone?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      scheduled_facebook_posts: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          facebook_post_id: string | null
+          id: string
+          image_url: string | null
+          link: string | null
+          message: string
+          scheduled_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          facebook_post_id?: string | null
+          id?: string
+          image_url?: string | null
+          link?: string | null
+          message: string
+          scheduled_at: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          facebook_post_id?: string | null
+          id?: string
+          image_url?: string | null
+          link?: string | null
+          message?: string
+          scheduled_at?: string
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }

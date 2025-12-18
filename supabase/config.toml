@@ -8,3 +8,9 @@ verify_jwt = false
 
 [functions.facebook-post]
 verify_jwt = false
+
+[functions.process-scheduled-posts]
+verify_jwt = false
+
+[functions.blog-admin]
+verify_jwt = false
