@@ -14,8 +14,30 @@ interface ContactNotificationRequest {
   message: string;
 }
 
+const sendEmail = async (to: string, subject: string, html: string) => {
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${RESEND_API_KEY}`,
+    },
+    body: JSON.stringify({
+      from: "Dr. Francesco Sartori <onboarding@resend.dev>",
+      to: [to],
+      subject,
+      html,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to send email");
+  }
+
+  return response.json();
+};
+
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -25,14 +47,6 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Sending contact notification for:", { name, email });
 
-    if (!adminEmail) {
-      console.error("ADMIN_EMAIL not configured");
-      return new Response(
-        JSON.stringify({ error: "Admin email not configured" }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
-      );
-    }
-
     if (!RESEND_API_KEY) {
       console.error("RESEND_API_KEY not configured");
       return new Response(
@@ -41,18 +55,12 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Send notification to admin using Resend API directly
-    const emailResponse = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: "Sito Web <onboarding@resend.dev>",
-        to: [adminEmail],
-        subject: `Nuovo messaggio da ${name}`,
-        html: `
+    // Send notification to admin
+    if (adminEmail) {
+      await sendEmail(
+        adminEmail,
+        `Nuovo messaggio da ${name}`,
+        `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
               Nuovo Messaggio dal Sito Web
@@ -72,18 +80,49 @@ const handler = async (req: Request): Promise<Response> => {
               Questo messaggio è stato inviato dal modulo di contatto del tuo sito web.
             </p>
           </div>
-        `,
-      }),
-    });
-
-    const responseData = await emailResponse.json();
-
-    if (!emailResponse.ok) {
-      console.error("Resend API error:", responseData);
-      throw new Error(responseData.message || "Failed to send email");
+        `
+      );
+      console.log("Admin notification sent");
     }
 
-    console.log("Email sent successfully:", responseData);
+    // Send confirmation email to sender
+    await sendEmail(
+      email,
+      "Grazie per avermi contattato!",
+      `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #1a365d; text-align: center; margin-bottom: 30px;">
+            Grazie per il tuo messaggio, ${name}!
+          </h2>
+          
+          <p style="color: #333; font-size: 16px; line-height: 1.6;">
+            Ho ricevuto il tuo messaggio e ti risponderò il prima possibile, solitamente entro 24-48 ore.
+          </p>
+          
+          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #1a365d;">
+            <h3 style="color: #495057; margin-top: 0; margin-bottom: 10px;">Il tuo messaggio:</h3>
+            <p style="color: #666; font-style: italic; white-space: pre-wrap; margin: 0;">${message}</p>
+          </div>
+          
+          <p style="color: #333; font-size: 16px; line-height: 1.6;">
+            Nel frattempo, puoi visitare il mio sito per scoprire di più sui miei servizi e il mio approccio terapeutico.
+          </p>
+          
+          <p style="color: #333; font-size: 16px; line-height: 1.6; margin-top: 30px;">
+            A presto,<br>
+            <strong>Dr. Francesco Sartori</strong><br>
+            <span style="color: #666;">Psicologo e Psicoterapeuta</span>
+          </p>
+          
+          <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+          
+          <p style="color: #999; font-size: 12px; text-align: center;">
+            Questa è un'email automatica. Non rispondere direttamente a questo messaggio.
+          </p>
+        </div>
+      `
+    );
+    console.log("Confirmation email sent to sender");
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,

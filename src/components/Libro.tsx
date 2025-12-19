@@ -1,9 +1,11 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useContent, type LibroContent } from "@/hooks/useContent";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, CheckCircle2, Users, Lightbulb, BookOpen } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ExternalLink, CheckCircle2, Users, Lightbulb, BookOpen, ShoppingCart } from "lucide-react";
+import { BookPurchaseForm } from "@/components/BookPurchaseForm";
 import bookCover from "@/assets/libro-cover.jpg";
 
 const Libro = () => {
@@ -11,6 +13,7 @@ const Libro = () => {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { data: content, isLoading } = useContent("libro");
   const libroContent = content as unknown as LibroContent;
+  const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
 
   if (isLoading || !libroContent) {
     return (
@@ -82,16 +85,27 @@ const Libro = () => {
                   {libroContent.secondDescription}
                 </p>
 
-                {libroContent.purchaseUrl && libroContent.purchaseUrl !== "#" && (
+                <div className="flex flex-col sm:flex-row gap-3">
                   <Button
                     size="lg"
-                    className="bg-primary hover:bg-accent text-primary-foreground w-full md:w-auto text-lg py-6"
-                    onClick={() => window.open(libroContent.purchaseUrl, "_blank")}
+                    className="bg-primary hover:bg-accent text-primary-foreground flex-1 text-lg py-6"
+                    onClick={() => setIsOrderDialogOpen(true)}
                   >
+                    <ShoppingCart className="mr-2" size={20} />
                     Acquista Ora
-                    <ExternalLink className="ml-2" size={20} />
                   </Button>
-                )}
+                  {libroContent.purchaseUrl && libroContent.purchaseUrl !== "#" && (
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="flex-1 text-lg py-6"
+                      onClick={() => window.open(libroContent.purchaseUrl, "_blank")}
+                    >
+                      Amazon
+                      <ExternalLink className="ml-2" size={20} />
+                    </Button>
+                  )}
+                </div>
               </motion.div>
             </div>
           </div>
@@ -203,21 +217,34 @@ const Libro = () => {
                 <p className="text-xl font-semibold text-primary mb-4">
                   Inizia oggi il tuo viaggio alla scoperta della geometria nascosta della tua mente.
                 </p>
-                {libroContent.purchaseUrl && libroContent.purchaseUrl !== "#" && (
-                  <Button
-                    size="lg"
-                    className="bg-primary hover:bg-accent text-primary-foreground text-lg px-8 py-6"
-                    onClick={() => window.open(libroContent.purchaseUrl, "_blank")}
-                  >
-                    Acquista il Libro
-                    <ExternalLink className="ml-2" size={20} />
-                  </Button>
-                )}
+                <Button
+                  size="lg"
+                  className="bg-primary hover:bg-accent text-primary-foreground text-lg px-8 py-6"
+                  onClick={() => setIsOrderDialogOpen(true)}
+                >
+                  <ShoppingCart className="mr-2" size={20} />
+                  Acquista il Libro
+                </Button>
               </div>
             </motion.div>
           )}
         </motion.div>
       </div>
+
+      {/* Dialog per l'ordine del libro */}
+      <Dialog open={isOrderDialogOpen} onOpenChange={setIsOrderDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-primary">
+              Ordina "{libroContent.title}"
+            </DialogTitle>
+            <DialogDescription>
+              Compila il modulo per ordinare il libro. Riceverai una email di conferma con i dettagli dell'ordine.
+            </DialogDescription>
+          </DialogHeader>
+          <BookPurchaseForm onSuccess={() => setIsOrderDialogOpen(false)} />
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
