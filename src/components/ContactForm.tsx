@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { TurnstileWidget } from '@/components/TurnstileWidget';
-import { useTurnstile } from '@/hooks/useTurnstile';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { contactFormSchema, FORM_LIMITS, sanitizeText } from '@/lib/formValidation';
@@ -25,16 +23,6 @@ export const ContactForm = () => {
   const honeypotRef = useRef<HTMLInputElement>(null);
   
   const { toast } = useToast();
-  const { 
-    token, 
-    isVerifying, 
-    error: turnstileError,
-    handleVerify, 
-    handleError, 
-    handleExpire,
-    verifyToken,
-    reset: resetTurnstile,
-  } = useTurnstile();
 
   const validateField = (field: keyof ContactFormData, value: string) => {
     const partialData = { ...formData, [field]: value };
@@ -80,26 +68,6 @@ export const ContactForm = () => {
       return;
     }
 
-    // Verify CAPTCHA
-    if (!token) {
-      toast({
-        title: "Verifica richiesta",
-        description: "Completa la verifica CAPTCHA",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const isValid = await verifyToken();
-    if (!isValid) {
-      toast({
-        title: "Verifica fallita",
-        description: turnstileError || "Completa la verifica CAPTCHA",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
@@ -130,7 +98,6 @@ export const ContactForm = () => {
 
       // Reset form
       setFormData({ name: '', email: '', message: '' });
-      resetTurnstile();
     } catch (error) {
       console.error('Error submitting contact form:', error);
       toast({
@@ -142,8 +109,6 @@ export const ContactForm = () => {
       setIsSubmitting(false);
     }
   };
-
-  const isLoading = isSubmitting || isVerifying;
 
   return (
     <motion.form
@@ -236,23 +201,13 @@ export const ContactForm = () => {
         </div>
       </div>
 
-      {/* Turnstile CAPTCHA */}
-      <TurnstileWidget
-        onVerify={handleVerify}
-        onError={handleError}
-        onExpire={handleExpire}
-      />
-      {turnstileError && (
-        <p className="text-sm text-destructive text-center">{turnstileError}</p>
-      )}
-
       <Button 
         type="submit" 
         className="w-full" 
-        disabled={isLoading}
+        disabled={isSubmitting}
         size="lg"
       >
-        {isLoading ? (
+        {isSubmitting ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Invio in corso...
