@@ -1,9 +1,19 @@
 import { motion } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState, useCallback } from "react";
 import { useContent, type ContattiContent } from "@/hooks/useContent";
 import { Mail, MapPin, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+// Email obfuscation utilities to prevent spam bot harvesting
+const obfuscateEmail = (email: string): string => {
+  // Replace @ and . with text equivalents for display
+  return email.replace('@', ' [at] ').replace(/\./g, ' [dot] ');
+};
+
+const deobfuscateEmail = (email: string): string => {
+  // This returns the original email for mailto links
+  return email;
+};
 const Contatti = () => {
   const ref = useRef(null);
   const { data: content, isLoading } = useContent("contatti");
@@ -88,12 +98,15 @@ const Contatti = () => {
               variant="outline"
               size="lg"
               className="w-full justify-start text-left hover:bg-primary/5 hover:border-primary/60 transition-all duration-300 group"
-              onClick={() => window.location.href = `mailto:${contattiContent.email}`}
+              onClick={() => window.location.href = `mailto:${deobfuscateEmail(contattiContent.email)}`}
             >
               <Mail className="mr-4 text-primary group-hover:scale-110 transition-transform duration-300" size={24} />
               <div>
                 <p className="font-semibold text-foreground text-base">Email</p>
-                <p className="text-muted-foreground text-sm">{contattiContent.email}</p>
+                {/* Email obfuscated to prevent spam bot harvesting */}
+                <p className="text-muted-foreground text-sm" aria-label="Indirizzo email">
+                  {obfuscateEmail(contattiContent.email)}
+                </p>
               </div>
             </Button>
 
