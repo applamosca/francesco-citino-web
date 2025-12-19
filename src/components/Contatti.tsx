@@ -122,7 +122,7 @@ const Contatti = () => {
                 <img src={whatsappLogo} alt="WhatsApp" className="mr-4 w-6 h-6 group-hover:scale-110 transition-transform duration-300" />
                 <div>
                   <p className="font-semibold text-foreground text-base">WhatsApp</p>
-                  <p className="text-muted-foreground text-sm">320 197 1983</p>
+                  <p className="text-muted-foreground text-sm">+39 320 197 1983</p>
                 </div>
               </Button>
             </div>
