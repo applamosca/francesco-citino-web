@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Lock, Save, LogOut, Plus, Trash2 } from "lucide-react";
+import { Lock, Save, LogOut, Plus, Trash2, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -151,6 +151,10 @@ const Admin = () => {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-primary">CMS Admin</h1>
           <div className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate("/admin/security")}>
+              <Shield className="mr-2" size={18} />
+              Sicurezza
+            </Button>
             <Button variant="outline" onClick={() => navigate("/")}>
               Visualizza Sito
             </Button>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
+import { logAccessAttempt } from './useAccessLogs';
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -69,10 +70,18 @@ export const useAuth = () => {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+    
+    // Log access attempt
+    if (error) {
+      logAccessAttempt(email, false, error.message);
+    } else if (data.user) {
+      logAccessAttempt(email, true, undefined, data.user.id);
+    }
+    
     return { error };
   };
 
