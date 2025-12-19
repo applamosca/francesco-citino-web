@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
-import { useRef, useState, useCallback } from "react";
+import { useRef } from "react";
 import { useContent, type ContattiContent } from "@/hooks/useContent";
-import { Mail, MapPin, ExternalLink } from "lucide-react";
+import { Mail, MapPin, ExternalLink, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ContactForm } from "@/components/ContactForm";
 
 // Email obfuscation utilities to prevent spam bot harvesting
 const obfuscateEmail = (email: string): string => {
@@ -113,6 +114,26 @@ const Contatti = () => {
             <p className="text-xs text-muted-foreground/60 text-center mt-8 italic">
               Per rimanere aggiornato, seguimi sui social tramite le icone a fondo pagina
             </p>
+          </motion.div>
+
+          {/* Contact Form Section */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.25 }}
+            className="bg-card rounded-2xl shadow-lg border border-border/50 p-8 md:p-12"
+          >
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <MessageCircle className="text-primary" size={28} />
+              <h3 className="text-2xl md:text-3xl font-semibold text-foreground text-center">
+                Scrivimi
+              </h3>
+            </div>
+            <p className="text-base text-center text-muted-foreground mb-8">
+              Compila il modulo per inviarmi un messaggio diretto.
+            </p>
+            <ContactForm />
           </motion.div>
 
           {/* Map Section */}
