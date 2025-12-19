@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LogOut, ArrowLeft, Send, Clock, Calendar, Trash2, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { LogOut, ArrowLeft, Send, Clock, Calendar, Trash2, CheckCircle, XCircle, AlertCircle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -270,7 +270,14 @@ const AdminFacebook = () => {
               Pubblica e programma post sulla tua pagina Facebook
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              variant="outline"
+              onClick={() => navigate('/admin/topics')}
+            >
+              <Sparkles className="mr-2 h-4 w-4" />
+              Gestione Temi AI
+            </Button>
             <Button
               variant="outline"
               onClick={() => navigate('/admin/panel')}
