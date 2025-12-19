@@ -17,7 +17,7 @@ import type { HeroContent, ChiSonoContent, ServiziContent, LibroContent, Contatt
 const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { session, isAdmin, user } = useAuth();
+  const { session, isAdmin, isAdminLoading, user, loading } = useAuth();
   const { isOTPRequired, isVerified, isLoading: otpLoading, sendOTP, verifyOTP, resetOTPState } = useAdminOTP();
   const [otpChecked, setOtpChecked] = useState(false);
 
@@ -71,8 +71,11 @@ const Admin = () => {
     }
   }, [session, isAdmin, user, otpChecked, sendOTP]);
 
-  // Redirect if not authenticated or not admin
+  // Redirect if not authenticated or not admin (only after loading completes)
   useEffect(() => {
+    // Wait for auth loading to complete
+    if (loading || isAdminLoading) return;
+
     if (!session) {
       toast({
         title: "Accesso negato",
@@ -88,7 +91,7 @@ const Admin = () => {
       });
       navigate("/");
     }
-  }, [session, isAdmin, navigate, toast]);
+  }, [session, isAdmin, loading, isAdminLoading, navigate, toast]);
 
   // Populate forms when data loads
   useEffect(() => {
@@ -159,7 +162,7 @@ const Admin = () => {
   }
 
   // Show loading while checking auth
-  if (!session || !isAdmin) {
+  if (loading || isAdminLoading || !session || !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10 px-4">
         <motion.div

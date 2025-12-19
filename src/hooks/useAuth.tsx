@@ -8,6 +8,7 @@ export const useAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdminLoading, setIsAdminLoading] = useState(true);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -18,11 +19,13 @@ export const useAuth = () => {
         
         // Check admin role when user changes
         if (session?.user) {
+          setIsAdminLoading(true);
           setTimeout(() => {
             checkAdminRole(session.user.id);
           }, 0);
         } else {
           setIsAdmin(false);
+          setIsAdminLoading(false);
         }
       }
     );
@@ -34,6 +37,8 @@ export const useAuth = () => {
       
       if (session?.user) {
         checkAdminRole(session.user.id);
+      } else {
+        setIsAdminLoading(false);
       }
       setLoading(false);
     });
@@ -54,6 +59,7 @@ export const useAuth = () => {
     } else {
       setIsAdmin(false);
     }
+    setIsAdminLoading(false);
   };
 
   const signUp = async (email: string, password: string) => {
@@ -95,6 +101,7 @@ export const useAuth = () => {
     session,
     loading,
     isAdmin,
+    isAdminLoading,
     signUp,
     signIn,
     signOut,
