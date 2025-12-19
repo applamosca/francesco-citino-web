@@ -24,7 +24,7 @@ declare global {
 }
 
 // Turnstile site key - this is public and safe to expose
-const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || '';
+const TURNSTILE_SITE_KEY = '0x4AAAAAACHoRzc93znwrGJY';
 
 export const TurnstileWidget = ({ onVerify, onError, onExpire }: TurnstileWidgetProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
