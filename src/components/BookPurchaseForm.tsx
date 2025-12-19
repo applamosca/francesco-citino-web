@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { TurnstileWidget } from '@/components/TurnstileWidget';
-import { useTurnstile } from '@/hooks/useTurnstile';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
@@ -54,16 +52,6 @@ export const BookPurchaseForm = ({ onSuccess }: BookPurchaseFormProps) => {
   const honeypotRef = useRef<HTMLInputElement>(null);
   
   const { toast } = useToast();
-  const { 
-    token, 
-    isVerifying, 
-    error: turnstileError,
-    handleVerify, 
-    handleError, 
-    handleExpire,
-    verifyToken,
-    reset: resetTurnstile,
-  } = useTurnstile();
 
   const validateField = (field: keyof BookOrderData, value: string | number) => {
     const partialData = { ...formData, [field]: value };
@@ -108,26 +96,6 @@ export const BookPurchaseForm = ({ onSuccess }: BookPurchaseFormProps) => {
       return;
     }
 
-    // Verify CAPTCHA
-    if (!token) {
-      toast({
-        title: "Verifica richiesta",
-        description: "Completa la verifica CAPTCHA",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const isValid = await verifyToken();
-    if (!isValid) {
-      toast({
-        title: "Verifica fallita",
-        description: turnstileError || "Completa la verifica CAPTCHA",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
@@ -151,7 +119,6 @@ export const BookPurchaseForm = ({ onSuccess }: BookPurchaseFormProps) => {
 
       // Reset form
       setFormData({ name: '', email: '', phone: '', shipping_address: '', quantity: 1 });
-      resetTurnstile();
       onSuccess?.();
     } catch (error: any) {
       console.error('Error submitting book order:', error);
@@ -164,8 +131,6 @@ export const BookPurchaseForm = ({ onSuccess }: BookPurchaseFormProps) => {
       setIsSubmitting(false);
     }
   };
-
-  const isLoading = isSubmitting || isVerifying;
 
   return (
     <motion.form
@@ -295,21 +260,13 @@ export const BookPurchaseForm = ({ onSuccess }: BookPurchaseFormProps) => {
         )}
       </div>
 
-      <div className="flex justify-center">
-        <TurnstileWidget
-          onVerify={handleVerify}
-          onError={handleError}
-          onExpire={handleExpire}
-        />
-      </div>
-
       <Button
         type="submit"
         className="w-full"
         size="lg"
-        disabled={isLoading}
+        disabled={isSubmitting}
       >
-        {isLoading ? (
+        {isSubmitting ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Elaborazione...

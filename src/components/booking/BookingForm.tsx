@@ -9,8 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Service } from '@/hooks/useServices';
-import { TurnstileWidget } from '@/components/TurnstileWidget';
-import { useTurnstile } from '@/hooks/useTurnstile';
 import { useToast } from '@/hooks/use-toast';
 import { bookingFormSchema, FORM_LIMITS } from '@/lib/formValidation';
 import type { BookingFormData } from '@/lib/formValidation';
@@ -52,15 +50,6 @@ export const BookingForm = ({
   const [errors, setErrors] = useState<Partial<Record<keyof BookingFormData, string>>>({});
   
   const { toast } = useToast();
-  const { 
-    token, 
-    isVerifying, 
-    error: turnstileError,
-    handleVerify, 
-    handleError, 
-    handleExpire,
-    verifyToken 
-  } = useTurnstile();
 
   const validateField = (field: keyof BookingFormData, value: string) => {
     const partialData = { ...formData, [field]: value };
@@ -95,26 +84,6 @@ export const BookingForm = ({
       toast({
         title: "Errore di validazione",
         description: "Controlla i campi del modulo",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Verify CAPTCHA
-    if (!token) {
-      toast({
-        title: "Verifica richiesta",
-        description: "Completa la verifica CAPTCHA",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const isValid = await verifyToken();
-    if (!isValid) {
-      toast({
-        title: "Verifica fallita",
-        description: turnstileError || "Completa la verifica CAPTCHA",
         variant: "destructive",
       });
       return;
@@ -231,16 +200,6 @@ export const BookingForm = ({
               {errors.notes && <p className="text-sm text-destructive">{errors.notes}</p>}
             </div>
 
-            {/* Turnstile CAPTCHA */}
-            <TurnstileWidget
-              onVerify={handleVerify}
-              onError={handleError}
-              onExpire={handleExpire}
-            />
-            {turnstileError && (
-              <p className="text-sm text-destructive text-center">{turnstileError}</p>
-            )}
-
             <div className="flex gap-3 pt-4">
               <Button
                 type="button"
@@ -253,9 +212,9 @@ export const BookingForm = ({
               <Button 
                 type="submit" 
                 className="flex-1" 
-                disabled={isLoading || isVerifying}
+                disabled={isLoading}
               >
-                {isLoading || isVerifying ? 'Verifica in corso...' : 'Conferma Prenotazione'}
+                {isLoading ? 'Invio in corso...' : 'Conferma Prenotazione'}
               </Button>
             </div>
           </form>
