@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Send, User, Mail, MessageSquare, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,9 @@ export const ContactForm = () => {
   });
   const [errors, setErrors] = useState<Partial<Record<keyof ContactFormData, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Honeypot field - should remain empty
+  const honeypotRef = useRef<HTMLInputElement>(null);
   
   const { toast } = useToast();
   const { 
@@ -53,6 +56,17 @@ export const ContactForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+
+    // Honeypot check - if filled, silently reject (bot detected)
+    if (honeypotRef.current?.value) {
+      console.log('Honeypot triggered - bot detected');
+      // Fake success to not alert bots
+      toast({
+        title: "Messaggio inviato!",
+        description: "Ti risponderò il prima possibile.",
+      });
+      return;
+    }
 
     // Validate form
     const result = contactFormSchema.safeParse(formData);
@@ -102,6 +116,13 @@ export const ContactForm = () => {
 
       if (error) throw error;
 
+      // Send email notification (fire and forget - don't block UI)
+      supabase.functions.invoke('send-contact-notification', {
+        body: sanitizedData,
+      }).catch(err => {
+        console.error('Email notification failed:', err);
+      });
+
       toast({
         title: "Messaggio inviato!",
         description: "Ti risponderò il prima possibile.",
@@ -133,6 +154,19 @@ export const ContactForm = () => {
       onSubmit={handleSubmit}
       className="space-y-5"
     >
+      {/* Honeypot field - hidden from users, catches bots */}
+      <div className="absolute -left-[9999px] opacity-0 pointer-events-none" aria-hidden="true">
+        <label htmlFor="website-url">Website URL</label>
+        <input
+          type="text"
+          id="website-url"
+          name="website_url"
+          ref={honeypotRef}
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="contact-name">Nome *</Label>
         <div className="relative">
