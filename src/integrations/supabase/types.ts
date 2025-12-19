@@ -35,6 +35,50 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_post_logs: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          facebook_post_id: string | null
+          generated_text: string
+          id: string
+          published: boolean
+          tone: string
+          topic_id: string | null
+          topic_name: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          facebook_post_id?: string | null
+          generated_text: string
+          id?: string
+          published?: boolean
+          tone?: string
+          topic_id?: string | null
+          topic_name: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          facebook_post_id?: string | null
+          generated_text?: string
+          id?: string
+          published?: boolean
+          tone?: string
+          topic_id?: string | null
+          topic_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_post_logs_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "content_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointments: {
         Row: {
           created_at: string
@@ -357,6 +401,7 @@ export type Database = {
       content_topics: {
         Row: {
           created_at: string
+          default_tone: string | null
           description: string | null
           id: string
           is_active: boolean
@@ -365,6 +410,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          default_tone?: string | null
           description?: string | null
           id?: string
           is_active?: boolean
@@ -373,6 +419,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          default_tone?: string | null
           description?: string | null
           id?: string
           is_active?: boolean

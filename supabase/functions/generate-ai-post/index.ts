@@ -6,6 +6,15 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Definizioni dei toni disponibili
+const TONE_PROMPTS: Record<string, string> = {
+  professionale: `Il tuo tono è autorevole ma accogliente, mai freddo o distaccato. Scrivi in modo professionale e informativo.`,
+  informale: `Il tuo tono è amichevole, colloquiale e diretto. Parla come se stessi conversando con un amico, usando un linguaggio semplice e accessibile.`,
+  tecnico: `Il tuo tono è scientifico e preciso. Usa terminologia tecnica appropriata e riferimenti a studi o ricerche quando pertinente. Mantieni comunque l'accessibilità.`,
+  empatico: `Il tuo tono è caldo, comprensivo e rassicurante. Metti al centro le emozioni del lettore e mostra vicinanza alle sue difficoltà.`,
+  motivazionale: `Il tuo tono è energico, positivo e incoraggiante. Ispira il lettore all'azione e al cambiamento con entusiasmo controllato.`
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -37,12 +46,22 @@ serve(async (req) => {
     // Get request body for optional parameters
     let autoPublish = false;
     let topicId: string | null = null;
+    let tone: string = 'professionale';
+    let saveLog = true;
+    
     try {
       const body = await req.json();
       autoPublish = body.autoPublish ?? false;
       topicId = body.topicId ?? null;
+      tone = body.tone ?? 'professionale';
+      saveLog = body.saveLog ?? true;
     } catch {
       // No body provided, use defaults
+    }
+
+    // Valida il tono
+    if (!TONE_PROMPTS[tone]) {
+      tone = 'professionale';
     }
 
     // Fetch a random active topic
@@ -81,12 +100,14 @@ serve(async (req) => {
       topic = topics[Math.floor(Math.random() * topics.length)];
     }
 
-    console.log('Selected topic:', topic.name);
+    console.log('Selected topic:', topic.name, '| Tone:', tone);
 
     // Generate post using Lovable AI
+    const toneInstruction = TONE_PROMPTS[tone];
+    
     const systemPrompt = `Sei un esperto di comunicazione social per il Dott. Francesco Citino, psicologo clinico e ipnoterapeuta. 
 Scrivi post Facebook brevi, empatici e professionali.
-Il tuo tono è autorevole ma accogliente, mai freddo o distaccato.
+${toneInstruction}
 I post devono essere informativi ma accessibili a tutti.
 NON usare hashtag.
 NON usare emoji in modo eccessivo (massimo 1-2 per post).
@@ -96,7 +117,7 @@ Scrivi in italiano.`;
     const userPrompt = `Scrivi un post Facebook sul tema: "${topic.name}"
 Descrizione del tema: ${topic.description || 'Nessuna descrizione aggiuntiva'}
 
-Ricorda: massimo 500 caratteri, tono professionale ma accogliente, adatto alla pagina del Dott. Francesco Citino.`;
+Ricorda: massimo 500 caratteri, tono ${tone}, adatto alla pagina del Dott. Francesco Citino.`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -149,6 +170,10 @@ Ricorda: massimo 500 caratteri, tono professionale ma accogliente, adatto alla p
 
     console.log('Generated post:', generatedText.substring(0, 100) + '...');
 
+    let published = false;
+    let facebookPostId: string | null = null;
+    let publishError: string | null = null;
+
     // If autoPublish is true, call the facebook-post function
     if (autoPublish) {
       console.log('Auto-publishing to Facebook...');
@@ -156,79 +181,65 @@ Ricorda: massimo 500 caratteri, tono professionale ma accogliente, adatto alla p
       const FACEBOOK_PAGE_ACCESS_TOKEN = Deno.env.get('FACEBOOK_PAGE_ACCESS_TOKEN');
       if (!FACEBOOK_PAGE_ACCESS_TOKEN) {
         console.error('FACEBOOK_PAGE_ACCESS_TOKEN not configured');
-        return new Response(
-          JSON.stringify({ 
-            success: true, 
-            generatedText,
-            topic: topic.name,
-            published: false,
-            error: 'Token Facebook non configurato'
-          }),
-          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        publishError = 'Token Facebook non configurato';
+      } else {
+        try {
+          // Get page ID
+          const meResponse = await fetch(`https://graph.facebook.com/v18.0/me?access_token=${FACEBOOK_PAGE_ACCESS_TOKEN}`);
+          const meData = await meResponse.json();
+          
+          if (meData.error) {
+            console.error('Facebook API error (me):', meData.error);
+            publishError = `Errore Facebook: ${meData.error.message}`;
+          } else {
+            const pageId = meData.id;
+
+            // Post to Facebook
+            const postResponse = await fetch(`https://graph.facebook.com/v18.0/${pageId}/feed`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: new URLSearchParams({
+                message: generatedText,
+                access_token: FACEBOOK_PAGE_ACCESS_TOKEN,
+              }).toString(),
+            });
+
+            const postResult = await postResponse.json();
+
+            if (postResult.error) {
+              console.error('Facebook API error (post):', postResult.error);
+              publishError = `Errore pubblicazione: ${postResult.error.message}`;
+            } else {
+              console.log('Post published successfully:', postResult.id);
+              published = true;
+              facebookPostId = postResult.id;
+            }
+          }
+        } catch (fbError) {
+          console.error('Facebook publish error:', fbError);
+          publishError = 'Errore durante la pubblicazione su Facebook';
+        }
       }
+    }
 
-      // Get page ID
-      const meResponse = await fetch(`https://graph.facebook.com/v18.0/me?access_token=${FACEBOOK_PAGE_ACCESS_TOKEN}`);
-      const meData = await meResponse.json();
-      
-      if (meData.error) {
-        console.error('Facebook API error (me):', meData.error);
-        return new Response(
-          JSON.stringify({ 
-            success: true, 
-            generatedText,
-            topic: topic.name,
-            published: false,
-            error: `Errore Facebook: ${meData.error.message}`
-          }),
-          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+    // Salva nel log
+    if (saveLog) {
+      try {
+        await supabase.from('ai_post_logs').insert({
+          topic_id: topic.id,
+          topic_name: topic.name,
+          generated_text: generatedText,
+          tone: tone,
+          published: published,
+          facebook_post_id: facebookPostId,
+          error_message: publishError,
+        });
+        console.log('Log saved successfully');
+      } catch (logError) {
+        console.error('Error saving log:', logError);
       }
-
-      const pageId = meData.id;
-
-      // Post to Facebook
-      const postResponse = await fetch(`https://graph.facebook.com/v18.0/${pageId}/feed`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          message: generatedText,
-          access_token: FACEBOOK_PAGE_ACCESS_TOKEN,
-        }).toString(),
-      });
-
-      const postResult = await postResponse.json();
-
-      if (postResult.error) {
-        console.error('Facebook API error (post):', postResult.error);
-        return new Response(
-          JSON.stringify({ 
-            success: true, 
-            generatedText,
-            topic: topic.name,
-            published: false,
-            error: `Errore pubblicazione: ${postResult.error.message}`
-          }),
-          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      console.log('Post published successfully:', postResult.id);
-
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          generatedText,
-          topic: topic.name,
-          published: true,
-          facebookPostId: postResult.id,
-          message: 'Post generato e pubblicato con successo!'
-        }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
     }
 
     return new Response(
@@ -236,8 +247,12 @@ Ricorda: massimo 500 caratteri, tono professionale ma accogliente, adatto alla p
         success: true, 
         generatedText,
         topic: topic.name,
-        published: false,
-        message: 'Post generato con successo'
+        topicId: topic.id,
+        tone,
+        published,
+        facebookPostId,
+        error: publishError,
+        message: published ? 'Post generato e pubblicato con successo!' : 'Post generato con successo'
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
