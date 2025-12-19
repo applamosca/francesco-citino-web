@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.log-access-attempt]
 verify_jwt = false
+
+[functions.admin-otp]
+verify_jwt = false

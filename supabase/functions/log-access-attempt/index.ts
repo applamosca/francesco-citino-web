@@ -17,6 +17,11 @@ interface AccessLogRequest {
 const FAILED_ATTEMPTS_THRESHOLD = 5; // Failed attempts in time window
 const TIME_WINDOW_MINUTES = 15; // Time window for counting attempts
 
+// Rate limiting thresholds
+const RATE_LIMIT_ATTEMPTS = 10; // Max attempts before blocking
+const RATE_LIMIT_WINDOW_MINUTES = 30; // Rate limit window
+const BLOCK_DURATION_MINUTES = 60; // Block duration
+
 serve(async (req: Request): Promise<Response> => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -40,6 +45,125 @@ serve(async (req: Request): Promise<Response> => {
     const userAgent = req.headers.get("user-agent") || "unknown";
 
     console.log(`Access attempt: email=${email}, success=${success}, ip=${ipAddress}`);
+
+    // Check if IP is blocked
+    const { data: blockedIP } = await supabase
+      .from("blocked_ips")
+      .select("id")
+      .eq("ip_address", ipAddress)
+      .eq("is_active", true)
+      .single();
+
+    if (blockedIP) {
+      console.log(`Blocked IP attempted access: ${ipAddress}`);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          blocked: true,
+          message: "IP address is blocked"
+        }),
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Rate limiting check
+    const rateLimitIdentifier = ipAddress !== "unknown" ? ipAddress : email;
+    const { data: rateLimit } = await supabase
+      .from("login_rate_limits")
+      .select("*")
+      .eq("identifier", rateLimitIdentifier)
+      .single();
+
+    const now = new Date();
+    
+    if (rateLimit) {
+      // Check if currently blocked
+      if (rateLimit.blocked_until && new Date(rateLimit.blocked_until) > now) {
+        const blockedUntil = new Date(rateLimit.blocked_until);
+        const minutesRemaining = Math.ceil((blockedUntil.getTime() - now.getTime()) / 60000);
+        
+        console.log(`Rate limited: ${rateLimitIdentifier}, blocked for ${minutesRemaining} more minutes`);
+        
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            rateLimited: true,
+            message: `Troppi tentativi. Riprova tra ${minutesRemaining} minuti.`
+          }),
+          { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        );
+      }
+
+      // Check if window has expired
+      const windowStart = new Date(rateLimit.first_attempt_at);
+      const windowExpiry = new Date(windowStart.getTime() + RATE_LIMIT_WINDOW_MINUTES * 60 * 1000);
+
+      if (now > windowExpiry) {
+        // Reset the counter
+        await supabase
+          .from("login_rate_limits")
+          .update({
+            attempt_count: 1,
+            first_attempt_at: now.toISOString(),
+            last_attempt_at: now.toISOString(),
+            blocked_until: null,
+          })
+          .eq("id", rateLimit.id);
+      } else {
+        // Increment counter
+        const newCount = rateLimit.attempt_count + 1;
+        const shouldBlock = newCount >= RATE_LIMIT_ATTEMPTS && !success;
+        const blockedUntil = shouldBlock 
+          ? new Date(now.getTime() + BLOCK_DURATION_MINUTES * 60 * 1000).toISOString()
+          : null;
+
+        await supabase
+          .from("login_rate_limits")
+          .update({
+            attempt_count: newCount,
+            last_attempt_at: now.toISOString(),
+            blocked_until: blockedUntil,
+          })
+          .eq("id", rateLimit.id);
+
+        // If blocked, also add to blocked_ips for persistent blocking
+        if (shouldBlock && ipAddress !== "unknown") {
+          const { error: blockError } = await supabase
+            .from("blocked_ips")
+            .upsert({
+              ip_address: ipAddress,
+              reason: `Rate limit exceeded: ${newCount} attempts in ${RATE_LIMIT_WINDOW_MINUTES} minutes`,
+              is_active: true,
+              expires_at: blockedUntil,
+            }, { onConflict: "ip_address" });
+
+          if (!blockError) {
+            console.log(`IP auto-blocked due to rate limiting: ${ipAddress}`);
+          }
+        }
+
+        if (shouldBlock) {
+          return new Response(
+            JSON.stringify({ 
+              success: false, 
+              rateLimited: true,
+              message: `Troppi tentativi. Riprova tra ${BLOCK_DURATION_MINUTES} minuti.`
+            }),
+            { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders } }
+          );
+        }
+      }
+    } else {
+      // Create new rate limit record
+      await supabase
+        .from("login_rate_limits")
+        .insert({
+          identifier: rateLimitIdentifier,
+          attempt_count: 1,
+          first_attempt_at: now.toISOString(),
+          last_attempt_at: now.toISOString(),
+        });
+    }
 
     // Check for suspicious activity (multiple failed attempts from same email or IP)
     const timeWindowStart = new Date(Date.now() - TIME_WINDOW_MINUTES * 60 * 1000).toISOString();
@@ -74,6 +198,14 @@ serve(async (req: Request): Promise<Response> => {
     if (insertError) {
       console.error("Error inserting access log:", insertError);
       throw new Error("Failed to log access attempt");
+    }
+
+    // Reset rate limit on successful login
+    if (success && rateLimit) {
+      await supabase
+        .from("login_rate_limits")
+        .delete()
+        .eq("identifier", rateLimitIdentifier);
     }
 
     // Send email notification for suspicious activity
@@ -129,7 +261,6 @@ serve(async (req: Request): Promise<Response> => {
         }
       } catch (emailError) {
         console.error("Failed to send security notification email:", emailError);
-        // Don't throw - logging should still succeed even if email fails
       }
     }
 

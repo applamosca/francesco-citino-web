@@ -13,7 +13,8 @@ import {
   Ban,
   Unlock,
   Trash2,
-  Plus
+  Plus,
+  Bell
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,6 +46,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useAccessLogs, useSecurityStats } from "@/hooks/useAccessLogs";
 import { useBlockedIPs, useBlockIP, useUnblockIP, useDeleteBlockedIP } from "@/hooks/useBlockedIPs";
+import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 
@@ -64,6 +66,30 @@ const AdminSecurity = () => {
   const [newIP, setNewIP] = useState("");
   const [blockReason, setBlockReason] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  // Realtime subscription for blocked IPs
+  useEffect(() => {
+    const channel = supabase
+      .channel('blocked-ips-changes')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'blocked_ips' },
+        (payload) => {
+          console.log('New IP blocked:', payload);
+          refetchBlocked();
+          toast({
+            title: "🚫 IP Bloccato Automaticamente",
+            description: `L'IP ${payload.new.ip_address} è stato bloccato per: ${payload.new.reason || 'attività sospetta'}`,
+            variant: "destructive",
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetchBlocked, toast]);
 
   useEffect(() => {
     if (!session) {
