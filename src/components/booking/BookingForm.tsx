@@ -12,6 +12,8 @@ import { Service } from '@/hooks/useServices';
 import { TurnstileWidget } from '@/components/TurnstileWidget';
 import { useTurnstile } from '@/hooks/useTurnstile';
 import { useToast } from '@/hooks/use-toast';
+import { bookingFormSchema, FORM_LIMITS } from '@/lib/formValidation';
+import type { BookingFormData } from '@/lib/formValidation';
 
 interface BookingFormProps {
   service: Service;
@@ -41,12 +43,13 @@ export const BookingForm = ({
   onBack,
   isLoading = false,
 }: BookingFormProps) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<BookingFormData>({
     name: defaultName,
     email: defaultEmail,
     phone: defaultPhone,
     notes: '',
   });
+  const [errors, setErrors] = useState<Partial<Record<keyof BookingFormData, string>>>({});
   
   const { toast } = useToast();
   const { 
@@ -59,23 +62,70 @@ export const BookingForm = ({
     verifyToken 
   } = useTurnstile();
 
+  const validateField = (field: keyof BookingFormData, value: string) => {
+    const partialData = { ...formData, [field]: value };
+    const result = bookingFormSchema.safeParse(partialData);
+    
+    if (!result.success) {
+      const fieldError = result.error.errors.find(e => e.path[0] === field);
+      setErrors(prev => ({ ...prev, [field]: fieldError?.message }));
+    } else {
+      setErrors(prev => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const handleChange = (field: keyof BookingFormData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    validateField(field, value);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Verify CAPTCHA if token exists
-    if (token) {
-      const isValid = await verifyToken();
-      if (!isValid) {
-        toast({
-          title: "Verifica fallita",
-          description: turnstileError || "Completa la verifica CAPTCHA",
-          variant: "destructive",
-        });
-        return;
-      }
+    setErrors({});
+
+    // Validate form
+    const result = bookingFormSchema.safeParse(formData);
+    if (!result.success) {
+      const fieldErrors: Partial<Record<keyof BookingFormData, string>> = {};
+      result.error.errors.forEach(err => {
+        const field = err.path[0] as keyof BookingFormData;
+        fieldErrors[field] = err.message;
+      });
+      setErrors(fieldErrors);
+      toast({
+        title: "Errore di validazione",
+        description: "Controlla i campi del modulo",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Verify CAPTCHA
+    if (!token) {
+      toast({
+        title: "Verifica richiesta",
+        description: "Completa la verifica CAPTCHA",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const isValid = await verifyToken();
+    if (!isValid) {
+      toast({
+        title: "Verifica fallita",
+        description: turnstileError || "Completa la verifica CAPTCHA",
+        variant: "destructive",
+      });
+      return;
     }
     
-    onSubmit(formData);
+    onSubmit({
+      name: result.data.name,
+      email: result.data.email,
+      phone: result.data.phone || '',
+      notes: result.data.notes || '',
+    });
   };
 
   return (
@@ -116,14 +166,15 @@ export const BookingForm = ({
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
+                  onChange={(e) => handleChange('name', e.target.value)}
                   className="pl-10"
                   placeholder="Mario Rossi"
+                  maxLength={FORM_LIMITS.name.max}
                   required
+                  aria-invalid={!!errors.name}
                 />
               </div>
+              {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
             </div>
 
             <div className="space-y-2">
@@ -134,14 +185,15 @@ export const BookingForm = ({
                   id="email"
                   type="email"
                   value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
+                  onChange={(e) => handleChange('email', e.target.value)}
                   className="pl-10"
                   placeholder="mario@email.com"
+                  maxLength={FORM_LIMITS.email.max}
                   required
+                  aria-invalid={!!errors.email}
                 />
               </div>
+              {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
             </div>
 
             <div className="space-y-2">
@@ -152,13 +204,14 @@ export const BookingForm = ({
                   id="phone"
                   type="tel"
                   value={formData.phone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
-                  }
+                  onChange={(e) => handleChange('phone', e.target.value)}
                   className="pl-10"
                   placeholder="+39 123 456 7890"
+                  maxLength={FORM_LIMITS.phone.max}
+                  aria-invalid={!!errors.phone}
                 />
               </div>
+              {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
             </div>
 
             <div className="space-y-2">
@@ -168,13 +221,14 @@ export const BookingForm = ({
                 <Textarea
                   id="notes"
                   value={formData.notes}
-                  onChange={(e) =>
-                    setFormData({ ...formData, notes: e.target.value })
-                  }
+                  onChange={(e) => handleChange('notes', e.target.value)}
                   className="pl-10 min-h-[100px]"
                   placeholder="Informazioni aggiuntive..."
+                  maxLength={FORM_LIMITS.notes.max}
+                  aria-invalid={!!errors.notes}
                 />
               </div>
+              {errors.notes && <p className="text-sm text-destructive">{errors.notes}</p>}
             </div>
 
             {/* Turnstile CAPTCHA */}
