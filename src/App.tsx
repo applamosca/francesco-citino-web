@@ -10,6 +10,7 @@ import AdminNew from "./pages/AdminNew";
 import AdminPanel from "./pages/AdminPanel";
 import AdminGallery from "./pages/AdminGallery";
 import AdminFacebook from "./pages/AdminFacebook";
+import AdminTopics from "./pages/AdminTopics";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/admin/panel" element={<AdminPanel />} />
           <Route path="/admin/gallery" element={<AdminGallery />} />
           <Route path="/admin/facebook" element={<AdminFacebook />} />
+          <Route path="/admin/topics" element={<AdminTopics />} />
           <Route path="/auth" element={<AuthPage />} />
 
           {/* Booking App */}
