@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { useRef } from "react";
 import { useContent, type ContattiContent } from "@/hooks/useContent";
-import { Mail, MapPin, ExternalLink, MessageCircle } from "lucide-react";
+import { Mail, MapPin, ExternalLink, MessageCircle, Phone } from "lucide-react";
+import whatsappLogo from "@/assets/whatsapp-logo.png";
 import { Button } from "@/components/ui/button";
 import { ContactForm } from "@/components/ContactForm";
 
@@ -92,24 +93,39 @@ const Contatti = () => {
             className="bg-card rounded-2xl shadow-lg border border-border/50 p-8 md:p-12"
           >
             <p className="text-base md:text-lg text-center text-muted-foreground mb-10 leading-relaxed">
-              Per consulenze, informazioni o collaborazioni, puoi contattarmi direttamente via email.
+              Per consulenze, informazioni o collaborazioni, puoi contattarmi direttamente via email o WhatsApp.
             </p>
 
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-full justify-start text-left hover:bg-primary/5 hover:border-primary/60 transition-all duration-300 group"
-              onClick={() => window.location.href = `mailto:${deobfuscateEmail(contattiContent.email)}`}
-            >
-              <Mail className="mr-4 text-primary group-hover:scale-110 transition-transform duration-300" size={24} />
-              <div>
-                <p className="font-semibold text-foreground text-base">Email</p>
-                {/* Email obfuscated to prevent spam bot harvesting */}
-                <p className="text-muted-foreground text-sm" aria-label="Indirizzo email">
-                  {obfuscateEmail(contattiContent.email)}
-                </p>
-              </div>
-            </Button>
+            <div className="space-y-4">
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full justify-start text-left hover:bg-primary/5 hover:border-primary/60 transition-all duration-300 group"
+                onClick={() => window.location.href = `mailto:${deobfuscateEmail(contattiContent.email)}`}
+              >
+                <Mail className="mr-4 text-primary group-hover:scale-110 transition-transform duration-300" size={24} />
+                <div>
+                  <p className="font-semibold text-foreground text-base">Email</p>
+                  {/* Email obfuscated to prevent spam bot harvesting */}
+                  <p className="text-muted-foreground text-sm" aria-label="Indirizzo email">
+                    {obfuscateEmail(contattiContent.email)}
+                  </p>
+                </div>
+              </Button>
+
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full justify-start text-left hover:bg-green-500/5 hover:border-green-500/60 transition-all duration-300 group"
+                onClick={() => window.open(`https://wa.me/393201971983?text=${encodeURIComponent('Dottore posso chiedere un appuntamento')}`, '_blank')}
+              >
+                <img src={whatsappLogo} alt="WhatsApp" className="mr-4 w-6 h-6 group-hover:scale-110 transition-transform duration-300" />
+                <div>
+                  <p className="font-semibold text-foreground text-base">WhatsApp</p>
+                  <p className="text-muted-foreground text-sm">320 197 1983</p>
+                </div>
+              </Button>
+            </div>
 
             <p className="text-xs text-muted-foreground/60 text-center mt-8 italic">
               Per rimanere aggiornato, seguimi sui social tramite le icone a fondo pagina
