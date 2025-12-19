@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_logs: {
+        Row: {
+          created_at: string
+          email: string
+          failure_reason: string | null
+          id: string
+          ip_address: string | null
+          is_suspicious: boolean
+          success: boolean
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          failure_reason?: string | null
+          id?: string
+          ip_address?: string | null
+          is_suspicious?: boolean
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          failure_reason?: string | null
+          id?: string
+          ip_address?: string | null
+          is_suspicious?: boolean
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       admin_settings: {
         Row: {
           id: string
@@ -625,7 +661,19 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      security_stats: {
+        Row: {
+          attempts_24h: number | null
+          attempts_7d: number | null
+          failed_24h: number | null
+          failed_7d: number | null
+          successful_24h: number | null
+          suspicious_24h: number | null
+          suspicious_7d: number | null
+          unique_ips_24h: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
