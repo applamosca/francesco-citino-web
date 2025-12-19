@@ -9,13 +9,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdminOTP } from "@/hooks/useAdminOTP";
 import { useContent, useUpdateContent } from "@/hooks/useContent";
+import OTPVerification from "@/components/OTPVerification";
 import type { HeroContent, ChiSonoContent, ServiziContent, LibroContent, ContattiContent, ServiceItem } from "@/hooks/useContent";
 
 const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { session, isAdmin } = useAuth();
+  const { session, isAdmin, user } = useAuth();
+  const { isOTPRequired, isVerified, isLoading: otpLoading, sendOTP, verifyOTP, resetOTPState } = useAdminOTP();
+  const [otpChecked, setOtpChecked] = useState(false);
 
   // Content queries
   const { data: heroContent } = useContent("hero");
@@ -59,6 +63,14 @@ const Admin = () => {
 
   const updateContentMutation = useUpdateContent();
 
+  // Check OTP requirement when admin logs in
+  useEffect(() => {
+    if (session && isAdmin && user && !otpChecked) {
+      setOtpChecked(true);
+      sendOTP(user.id, user.email || "");
+    }
+  }, [session, isAdmin, user, otpChecked, sendOTP]);
+
   // Redirect if not authenticated or not admin
   useEffect(() => {
     if (!session) {
@@ -87,7 +99,19 @@ const Admin = () => {
     if (contattiContent) setContattiForm(contattiContent as unknown as ContattiContent);
   }, [heroContent, chiSonoContent, serviziContent, libroContent, contattiContent]);
 
+  // Handle OTP verification
+  const handleVerifyOTP = async (code: string) => {
+    if (!user) return { success: false };
+    return await verifyOTP(user.id, code);
+  };
+
+  const handleResendOTP = async () => {
+    if (!user) return;
+    await sendOTP(user.id, user.email || "");
+  };
+
   const handleLogout = async () => {
+    resetOTPState();
     navigate("/");
   };
 
@@ -121,6 +145,18 @@ const Admin = () => {
       });
     }
   };
+
+  // Show OTP verification screen for admins
+  if (session && isAdmin && isOTPRequired && !isVerified) {
+    return (
+      <OTPVerification
+        onVerify={handleVerifyOTP}
+        onResend={handleResendOTP}
+        isLoading={otpLoading}
+        email={user?.email || ""}
+      />
+    );
+  }
 
   // Show loading while checking auth
   if (!session || !isAdmin) {
