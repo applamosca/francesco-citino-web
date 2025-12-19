@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LogOut, ArrowLeft, Send, Clock, Calendar, Trash2, CheckCircle, XCircle, AlertCircle, Sparkles } from "lucide-react";
+import { LogOut, ArrowLeft, Send, Clock, Calendar, Trash2, CheckCircle, XCircle, AlertCircle, Sparkles, History, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +28,33 @@ interface ScheduledPost {
   error_message: string | null;
   created_at: string;
 }
+
+interface ContentTopic {
+  id: string;
+  name: string;
+  description: string | null;
+  is_active: boolean;
+}
+
+interface AiPostLog {
+  id: string;
+  topic_id: string | null;
+  topic_name: string;
+  generated_text: string;
+  tone: string;
+  published: boolean;
+  facebook_post_id: string | null;
+  error_message: string | null;
+  created_at: string;
+}
+
+const TONE_OPTIONS = [
+  { value: 'professionale', label: 'Professionale', description: 'Autorevole ma accogliente' },
+  { value: 'informale', label: 'Informale', description: 'Amichevole e colloquiale' },
+  { value: 'tecnico', label: 'Tecnico', description: 'Scientifico e preciso' },
+  { value: 'empatico', label: 'Empatico', description: 'Caldo e rassicurante' },
+  { value: 'motivazionale', label: 'Motivazionale', description: 'Energico e incoraggiante' },
+];
 
 const AdminFacebook = () => {
   const navigate = useNavigate();
@@ -48,6 +76,13 @@ const AdminFacebook = () => {
   });
   const [posting, setPosting] = useState(false);
   const [scheduling, setScheduling] = useState(false);
+  
+  // AI Generation state
+  const [selectedTopic, setSelectedTopic] = useState<string>("");
+  const [selectedTone, setSelectedTone] = useState<string>("professionale");
+  const [generating, setGenerating] = useState(false);
+  const [generatedPost, setGeneratedPost] = useState<{ text: string; topic: string; tone: string } | null>(null);
+  const [publishingAi, setPublishingAi] = useState(false);
 
   const { data: scheduledPosts, isLoading: postsLoading } = useQuery({
     queryKey: ["scheduled-facebook-posts"],
@@ -59,6 +94,36 @@ const AdminFacebook = () => {
 
       if (error) throw error;
       return data as ScheduledPost[];
+    },
+    enabled: isAdmin,
+  });
+
+  const { data: topics } = useQuery({
+    queryKey: ["content-topics-active"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("content_topics")
+        .select("*")
+        .eq("is_active", true)
+        .order("name");
+
+      if (error) throw error;
+      return data as ContentTopic[];
+    },
+    enabled: isAdmin,
+  });
+
+  const { data: aiLogs, isLoading: logsLoading } = useQuery({
+    queryKey: ["ai-post-logs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ai_post_logs")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      return data as AiPostLog[];
     },
     enabled: isAdmin,
   });
@@ -227,6 +292,75 @@ const AdminFacebook = () => {
     }
   };
 
+  const handleGenerateAi = async () => {
+    setGenerating(true);
+    setGeneratedPost(null);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-ai-post', {
+        body: { 
+          topicId: selectedTopic || undefined, 
+          tone: selectedTone,
+          autoPublish: false,
+          saveLog: true
+        },
+      });
+
+      if (error) throw error;
+      if (data.error) throw new Error(data.error);
+
+      setGeneratedPost({ 
+        text: data.generatedText, 
+        topic: data.topic,
+        tone: selectedTone
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ["ai-post-logs"] });
+      
+      toast({
+        title: "Generato!",
+        description: `Post generato sul tema: ${data.topic}`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Errore",
+        description: error.message || "Impossibile generare il post",
+        variant: "destructive",
+      });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handlePublishGeneratedPost = async () => {
+    if (!generatedPost) return;
+    
+    setPublishingAi(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('facebook-post', {
+        body: { message: generatedPost.text },
+      });
+
+      if (error) throw error;
+      if (data.error) throw new Error(data.error);
+
+      toast({
+        title: "Pubblicato!",
+        description: "Post pubblicato su Facebook",
+      });
+      setGeneratedPost(null);
+      queryClient.invalidateQueries({ queryKey: ["ai-post-logs"] });
+    } catch (error: any) {
+      toast({
+        title: "Errore",
+        description: error.message || "Impossibile pubblicare",
+        variant: "destructive",
+      });
+    } finally {
+      setPublishingAi(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
@@ -238,6 +372,11 @@ const AdminFacebook = () => {
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
+  };
+
+  const getToneBadge = (tone: string) => {
+    const toneOption = TONE_OPTIONS.find(t => t.value === tone);
+    return <Badge variant="outline">{toneOption?.label || tone}</Badge>;
   };
 
   if (loading) {
@@ -296,10 +435,12 @@ const AdminFacebook = () => {
         </motion.div>
 
         <Tabs defaultValue="post-now" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="post-now">Pubblica Ora</TabsTrigger>
             <TabsTrigger value="schedule">Programma</TabsTrigger>
+            <TabsTrigger value="generate-ai">Genera AI</TabsTrigger>
             <TabsTrigger value="history">Storico</TabsTrigger>
+            <TabsTrigger value="ai-history">Log AI</TabsTrigger>
           </TabsList>
 
           {/* Post Now Tab */}
@@ -445,6 +586,118 @@ const AdminFacebook = () => {
             </motion.div>
           </TabsContent>
 
+          {/* Generate AI Tab */}
+          <TabsContent value="generate-ai">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="space-y-6"
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5" />
+                    Genera Post con AI
+                  </CardTitle>
+                  <CardDescription>
+                    Seleziona un tema e un tono, poi genera e rivedi il post prima di pubblicarlo
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label>Tema</Label>
+                      <Select value={selectedTopic} onValueChange={setSelectedTopic}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Casuale (qualsiasi tema attivo)" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">Casuale (qualsiasi tema attivo)</SelectItem>
+                          {topics?.map((topic) => (
+                            <SelectItem key={topic.id} value={topic.id}>
+                              {topic.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Tono</Label>
+                      <Select value={selectedTone} onValueChange={setSelectedTone}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TONE_OPTIONS.map((tone) => (
+                            <SelectItem key={tone.value} value={tone.value}>
+                              <div className="flex flex-col">
+                                <span>{tone.label}</span>
+                                <span className="text-xs text-muted-foreground">{tone.description}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <Button onClick={handleGenerateAi} disabled={generating} className="w-full md:w-auto">
+                    {generating ? "Generazione in corso..." : (
+                      <>
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Genera Post
+                      </>
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Generated Post Preview */}
+              {generatedPost && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Card className="border-primary/50 bg-primary/5">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Eye className="h-5 w-5 text-primary" />
+                        Anteprima Post
+                      </CardTitle>
+                      <div className="flex gap-2 mt-2">
+                        <Badge variant="secondary">{generatedPost.topic}</Badge>
+                        {getToneBadge(generatedPost.tone)}
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="p-4 bg-background rounded-lg border">
+                        <p className="whitespace-pre-wrap">{generatedPost.text}</p>
+                      </div>
+                      <div className="flex gap-2 flex-wrap">
+                        <Button onClick={handlePublishGeneratedPost} disabled={publishingAi}>
+                          {publishingAi ? "Pubblicazione..." : (
+                            <>
+                              <Send className="mr-2 h-4 w-4" />
+                              Pubblica su Facebook
+                            </>
+                          )}
+                        </Button>
+                        <Button variant="outline" onClick={handleGenerateAi} disabled={generating}>
+                          <Sparkles className="mr-2 h-4 w-4" />
+                          Rigenera
+                        </Button>
+                        <Button variant="ghost" onClick={() => setGeneratedPost(null)}>
+                          Scarta
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+            </motion.div>
+          </TabsContent>
+
           {/* History Tab */}
           <TabsContent value="history">
             <motion.div
@@ -494,9 +747,9 @@ const AdminFacebook = () => {
                             </div>
                             {post.status === 'pending' && (
                               <Button
-                                variant="ghost"
                                 size="sm"
-                                className="text-destructive hover:bg-destructive/10"
+                                variant="ghost"
+                                className="text-destructive hover:text-destructive"
                                 onClick={() => handleDeleteScheduled(post.id)}
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -507,9 +760,82 @@ const AdminFacebook = () => {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-center text-muted-foreground py-8">
-                      Nessun post programmato
-                    </p>
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>Nessun post programmato</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          </TabsContent>
+
+          {/* AI History Tab */}
+          <TabsContent value="ai-history">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <History className="h-5 w-5" />
+                    Storico Post AI
+                  </CardTitle>
+                  <CardDescription>
+                    Cronologia dei post generati automaticamente dall'intelligenza artificiale
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {logsLoading ? (
+                    <div className="space-y-4">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="h-24 bg-muted rounded-lg animate-pulse" />
+                      ))}
+                    </div>
+                  ) : aiLogs && aiLogs.length > 0 ? (
+                    <div className="space-y-4">
+                      {aiLogs.map((log) => (
+                        <div
+                          key={log.id}
+                          className="p-4 border rounded-lg bg-card hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex justify-between items-start gap-4 mb-3">
+                            <div className="flex gap-2 flex-wrap">
+                              <Badge variant="secondary">{log.topic_name}</Badge>
+                              {getToneBadge(log.tone)}
+                              {log.published ? (
+                                <Badge variant="outline" className="text-green-600 border-green-600">
+                                  <CheckCircle className="w-3 h-3 mr-1" /> Pubblicato
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline">
+                                  Solo generato
+                                </Badge>
+                              )}
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {format(new Date(log.created_at), "dd/MM/yyyy HH:mm", { locale: it })}
+                            </span>
+                          </div>
+                          <p className="text-foreground text-sm line-clamp-3">
+                            {log.generated_text}
+                          </p>
+                          {log.error_message && (
+                            <p className="mt-2 text-sm text-destructive flex items-center gap-1">
+                              <AlertCircle className="w-4 h-4" />
+                              {log.error_message}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>Nessun post AI generato ancora</p>
+                    </div>
                   )}
                 </CardContent>
               </Card>
