@@ -9,6 +9,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Service } from '@/hooks/useServices';
+import { TurnstileWidget } from '@/components/TurnstileWidget';
+import { useTurnstile } from '@/hooks/useTurnstile';
+import { useToast } from '@/hooks/use-toast';
 
 interface BookingFormProps {
   service: Service;
@@ -44,9 +47,34 @@ export const BookingForm = ({
     phone: defaultPhone,
     notes: '',
   });
+  
+  const { toast } = useToast();
+  const { 
+    token, 
+    isVerifying, 
+    error: turnstileError,
+    handleVerify, 
+    handleError, 
+    handleExpire,
+    verifyToken 
+  } = useTurnstile();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Verify CAPTCHA if token exists
+    if (token) {
+      const isValid = await verifyToken();
+      if (!isValid) {
+        toast({
+          title: "Verifica fallita",
+          description: turnstileError || "Completa la verifica CAPTCHA",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    
     onSubmit(formData);
   };
 
@@ -149,6 +177,16 @@ export const BookingForm = ({
               </div>
             </div>
 
+            {/* Turnstile CAPTCHA */}
+            <TurnstileWidget
+              onVerify={handleVerify}
+              onError={handleError}
+              onExpire={handleExpire}
+            />
+            {turnstileError && (
+              <p className="text-sm text-destructive text-center">{turnstileError}</p>
+            )}
+
             <div className="flex gap-3 pt-4">
               <Button
                 type="button"
@@ -158,8 +196,12 @@ export const BookingForm = ({
               >
                 Indietro
               </Button>
-              <Button type="submit" className="flex-1" disabled={isLoading}>
-                {isLoading ? 'Prenotazione in corso...' : 'Conferma Prenotazione'}
+              <Button 
+                type="submit" 
+                className="flex-1" 
+                disabled={isLoading || isVerifying}
+              >
+                {isLoading || isVerifying ? 'Verifica in corso...' : 'Conferma Prenotazione'}
               </Button>
             </div>
           </form>
