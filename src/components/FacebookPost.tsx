@@ -32,37 +32,55 @@ const FacebookPost = ({ postUrl }: FacebookPostProps) => {
           viewport={{ once: true }}
           className="flex justify-center"
         >
-          <div className="bg-card border border-border rounded-xl p-8 max-w-lg w-full shadow-lg">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-[#1877F2] flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+          <div className="bg-card border border-border rounded-xl overflow-hidden max-w-2xl w-full shadow-lg">
+            {/* Post Image Preview */}
+            <div className="aspect-video bg-gradient-to-br from-[#1877F2]/20 to-[#1877F2]/5 flex items-center justify-center relative overflow-hidden">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <svg className="w-24 h-24 text-[#1877F2]/30" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
               </div>
-              <div>
-                <h3 className="font-semibold text-foreground">Pensiero Perante</h3>
-                <p className="text-sm text-muted-foreground">Pagina Facebook</p>
-              </div>
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-card/80 to-transparent h-20" />
             </div>
             
-            <p className="text-foreground mb-6">
-              Scopri l'ultimo post pubblicato sulla pagina Facebook! Clicca il pulsante per leggerlo.
-            </p>
-            
-            <Button
-              asChild
-              className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white"
-            >
-              <a
-                href={postUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2"
+            <div className="p-6">
+              {/* Page Header */}
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-full bg-[#1877F2] flex items-center justify-center flex-shrink-0">
+                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground">Pensiero Perante</h3>
+                  <p className="text-sm text-muted-foreground">Pagina Facebook</p>
+                </div>
+              </div>
+              
+              {/* Post Preview Text */}
+              <p className="text-foreground mb-4 line-clamp-3">
+                Riflessioni sulla psicologia e il benessere mentale. Scopri l'ultimo contenuto condiviso sulla nostra pagina Facebook, dove esploriamo temi legati alla crescita personale e alla consapevolezza di sé.
+              </p>
+              
+              <p className="text-sm text-muted-foreground mb-6">
+                Clicca per leggere il post completo su Facebook
+              </p>
+              
+              <Button
+                asChild
+                className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white"
               >
-                <ExternalLink className="w-4 h-4" />
-                Leggi il Post su Facebook
-              </a>
-            </Button>
+                <a
+                  href={postUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Leggi il Post Completo
+                </a>
+              </Button>
+            </div>
           </div>
         </motion.div>
 
