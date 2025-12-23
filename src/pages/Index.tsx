@@ -7,6 +7,7 @@ import Gallery from "@/components/Gallery";
 import Libro from "@/components/Libro";
 import Contatti from "@/components/Contatti";
 import Footer from "@/components/Footer";
+import FacebookPost from "@/components/FacebookPost";
 
 const Index = () => {
   return (
@@ -17,6 +18,7 @@ const Index = () => {
         <ChiSono />
         <Servizi />
         <Blog />
+        <FacebookPost postUrl="https://www.facebook.com/share/p/1FwANHNL3D/" />
         <Gallery />
         <Libro />
         <Contatti />
