@@ -17,8 +17,8 @@ const Index = () => {
         <Hero />
         <ChiSono />
         <Servizi />
-        <Blog />
         <FacebookPost postUrl="https://www.facebook.com/share/p/1FwANHNL3D/" />
+        <Blog />
         <Gallery />
         <Libro />
         <Contatti />
