@@ -45,12 +45,12 @@ export const useSecurityStats = () => {
     queryKey: ["security-stats"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("security_stats")
-        .select("*")
-        .single();
+        .rpc("get_security_stats");
 
       if (error) throw error;
-      return data as SecurityStats;
+      // The RPC returns an array, get the first row
+      const stats = Array.isArray(data) ? data[0] : data;
+      return stats as SecurityStats;
     },
   });
 };
