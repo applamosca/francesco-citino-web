@@ -745,21 +745,22 @@ export type Database = {
       }
     }
     Views: {
-      security_stats: {
-        Row: {
-          attempts_24h: number | null
-          attempts_7d: number | null
-          failed_24h: number | null
-          failed_7d: number | null
-          successful_24h: number | null
-          suspicious_24h: number | null
-          suspicious_7d: number | null
-          unique_ips_24h: number | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
+      get_security_stats: {
+        Args: never
+        Returns: {
+          attempts_24h: number
+          attempts_7d: number
+          failed_24h: number
+          failed_7d: number
+          successful_24h: number
+          suspicious_24h: number
+          suspicious_7d: number
+          unique_ips_24h: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
