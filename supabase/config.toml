@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.get-facebook-posts]
 verify_jwt = false
+
+[functions.send-appointment-notification]
+verify_jwt = false
