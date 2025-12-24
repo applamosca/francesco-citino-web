@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, isWithinInterval } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Settings, Calendar, Users } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Settings, Calendar, Users, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,11 +13,24 @@ import { Input } from '@/components/ui/input';
 import { BookingNavbar } from '@/components/booking/BookingNavbar';
 import { AppointmentCard } from '@/components/booking/AppointmentCard';
 import { useAuth } from '@/hooks/useAuth';
-import { useAllAppointments, useUpdateAppointmentStatus } from '@/hooks/useAppointments';
+import { useAllAppointments, useUpdateAppointmentStatus, Appointment } from '@/hooks/useAppointments';
+import { useDeleteAppointment } from '@/hooks/useDeleteAppointment';
 import { useAvailability } from '@/hooks/useAvailability';
+import { sendAppointmentNotification } from '@/hooks/useAppointmentNotification';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const dayNames = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
 
@@ -26,10 +39,12 @@ export const BookingAdmin = () => {
   const { data: appointments, isLoading: appointmentsLoading } = useAllAppointments();
   const { data: availability } = useAvailability();
   const updateStatus = useUpdateAppointmentStatus();
+  const deleteAppointment = useDeleteAppointment();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const [currentWeek, setCurrentWeek] = useState(new Date());
+  const [appointmentToDelete, setAppointmentToDelete] = useState<Appointment | null>(null);
 
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 });
@@ -51,21 +66,72 @@ export const BookingAdmin = () => {
     };
   }, [appointments, weekAppointments]);
 
-  const handleConfirm = async (id: string) => {
+  const handleConfirm = async (appointment: Appointment) => {
     try {
-      await updateStatus.mutateAsync({ id, status: 'confirmed' });
+      await updateStatus.mutateAsync({ id: appointment.id, status: 'confirmed' });
       toast({ title: 'Appuntamento confermato' });
+      
+      // Send email notification
+      try {
+        await sendAppointmentNotification({
+          email: appointment.email,
+          name: appointment.name,
+          serviceName: appointment.services?.name || 'Consulenza',
+          appointmentDate: appointment.preferred_date,
+          status: 'confirmed',
+        });
+        toast({ title: 'Email di conferma inviata' });
+      } catch (emailError) {
+        console.error('Error sending email:', emailError);
+      }
     } catch (error) {
       toast({ title: 'Errore', variant: 'destructive' });
     }
   };
 
-  const handleCancel = async (id: string) => {
+  const handleCancel = async (appointment: Appointment) => {
     try {
-      await updateStatus.mutateAsync({ id, status: 'cancelled' });
+      await updateStatus.mutateAsync({ id: appointment.id, status: 'cancelled' });
       toast({ title: 'Appuntamento cancellato' });
+      
+      // Send email notification
+      try {
+        await sendAppointmentNotification({
+          email: appointment.email,
+          name: appointment.name,
+          serviceName: appointment.services?.name || 'Consulenza',
+          appointmentDate: appointment.preferred_date,
+          status: 'cancelled',
+        });
+        toast({ title: 'Email di cancellazione inviata' });
+      } catch (emailError) {
+        console.error('Error sending email:', emailError);
+      }
     } catch (error) {
       toast({ title: 'Errore', variant: 'destructive' });
+    }
+  };
+
+  const handleDelete = async (appointment: Appointment) => {
+    try {
+      // Send email before deleting
+      try {
+        await sendAppointmentNotification({
+          email: appointment.email,
+          name: appointment.name,
+          serviceName: appointment.services?.name || 'Consulenza',
+          appointmentDate: appointment.preferred_date,
+          status: 'deleted',
+        });
+      } catch (emailError) {
+        console.error('Error sending email:', emailError);
+      }
+      
+      await deleteAppointment.mutateAsync(appointment.id);
+      toast({ title: 'Appuntamento eliminato' });
+      setAppointmentToDelete(null);
+    } catch (error) {
+      toast({ title: 'Errore durante l\'eliminazione', variant: 'destructive' });
     }
   };
 
@@ -197,13 +263,41 @@ export const BookingAdmin = () => {
             ) : (
               <div className="space-y-4">
                 {weekAppointments.map((appointment) => (
-                  <AppointmentCard
-                    key={appointment.id}
-                    appointment={appointment}
-                    isAdmin
-                    onConfirm={() => handleConfirm(appointment.id)}
-                    onCancel={() => handleCancel(appointment.id)}
-                  />
+                  <div key={appointment.id} className="relative">
+                    <AppointmentCard
+                      appointment={appointment}
+                      isAdmin
+                      showActions
+                      onConfirm={() => handleConfirm(appointment)}
+                      onCancel={() => handleCancel(appointment)}
+                    />
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-4 right-4"
+                          onClick={() => setAppointmentToDelete(appointment)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Eliminare questo appuntamento?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Questa azione è irreversibile. L'appuntamento di {appointment.name} verrà eliminato permanentemente.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Annulla</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDelete(appointment)}>
+                            Elimina
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 ))}
               </div>
             )}
