@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface FacebookPostData {
   id: string;
@@ -16,34 +17,36 @@ const FacebookPost = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchLatestPost = async () => {
-      try {
-        const { data, error: fnError } = await supabase.functions.invoke('get-facebook-posts', {
-          body: { limit: 1 }
-        });
+  const fetchLatestPost = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('get-facebook-posts', {
+        body: { limit: 1 }
+      });
 
-        if (fnError) {
-          console.error('Error fetching Facebook posts:', fnError);
-          setError('Impossibile caricare il post');
-          return;
-        }
-
-        if (data?.posts && data.posts.length > 0) {
-          setPost(data.posts[0]);
-        } else {
-          setError('Nessun post disponibile');
-        }
-      } catch (err) {
-        console.error('Error:', err);
-        setError('Errore di connessione');
-      } finally {
-        setLoading(false);
+      if (fnError) {
+        console.error('Error fetching Facebook posts:', fnError);
+        setError('Impossibile caricare il post');
+        return;
       }
-    };
 
-    fetchLatestPost();
+      if (data?.posts && data.posts.length > 0) {
+        setPost(data.posts[0]);
+      } else {
+        setError('Nessun post disponibile');
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      setError('Errore di connessione');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchLatestPost();
+  }, [fetchLatestPost]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('it-IT', {
@@ -66,9 +69,19 @@ const FacebookPost = () => {
           <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-4">
             Ultimi Aggiornamenti
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-muted-foreground max-w-2xl mx-auto mb-4">
             Segui le ultime novità dalla pagina Facebook "Pensiero Perante"
           </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchLatestPost}
+            disabled={loading}
+            className="gap-2"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            Aggiorna
+          </Button>
         </motion.div>
 
         <motion.div
