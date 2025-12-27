@@ -17,7 +17,7 @@ const Index = () => {
         <Hero />
         <ChiSono />
         <Servizi />
-        <FacebookPost postUrl="https://www.facebook.com/pensieroperante/posts/pfbid02NvNwXiMEZVTnkkoxiEiPyXMYZRhbfpqEgaKwfWYPvxq2cTpewzBMr7MhDvcVB1Tl" />
+        <FacebookPost />
         <Blog />
         <Gallery />
         <Libro />
