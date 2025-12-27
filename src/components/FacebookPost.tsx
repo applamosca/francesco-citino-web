@@ -1,50 +1,57 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
+import { Loader2, AlertCircle } from 'lucide-react';
 
-interface FacebookPostProps {
-  postUrl: string;
+interface FacebookPostData {
+  id: string;
+  message?: string;
+  full_picture?: string;
+  created_time: string;
+  permalink_url: string;
 }
 
-declare global {
-  interface Window {
-    FB?: {
-      XFBML: {
-        parse: (element?: HTMLElement) => void;
-      };
-    };
-  }
-}
-
-const FacebookPost = ({ postUrl }: FacebookPostProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
+const FacebookPost = () => {
+  const [post, setPost] = useState<FacebookPostData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load Facebook SDK
-    const loadFacebookSDK = () => {
-      if (document.getElementById('facebook-jssdk')) {
-        // SDK already loaded, just parse
-        if (window.FB) {
-          window.FB.XFBML.parse(containerRef.current || undefined);
-        }
-        return;
-      }
+    const fetchLatestPost = async () => {
+      try {
+        const { data, error: fnError } = await supabase.functions.invoke('get-facebook-posts', {
+          body: { limit: 1 }
+        });
 
-      const script = document.createElement('script');
-      script.id = 'facebook-jssdk';
-      script.src = 'https://connect.facebook.net/it_IT/sdk.js#xfbml=1&version=v18.0';
-      script.async = true;
-      script.defer = true;
-      script.crossOrigin = 'anonymous';
-      script.onload = () => {
-        if (window.FB && containerRef.current) {
-          window.FB.XFBML.parse(containerRef.current);
+        if (fnError) {
+          console.error('Error fetching Facebook posts:', fnError);
+          setError('Impossibile caricare il post');
+          return;
         }
-      };
-      document.body.appendChild(script);
+
+        if (data?.posts && data.posts.length > 0) {
+          setPost(data.posts[0]);
+        } else {
+          setError('Nessun post disponibile');
+        }
+      } catch (err) {
+        console.error('Error:', err);
+        setError('Errore di connessione');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    loadFacebookSDK();
-  }, [postUrl]);
+    fetchLatestPost();
+  }, []);
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('it-IT', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  };
 
   return (
     <section id="facebook-post" className="py-16 md:py-24 bg-muted/30">
@@ -70,14 +77,52 @@ const FacebookPost = ({ postUrl }: FacebookPostProps) => {
           transition={{ duration: 0.6, delay: 0.2 }}
           viewport={{ once: true }}
           className="flex justify-center"
-          ref={containerRef}
         >
-          <div 
-            className="fb-post" 
-            data-href={postUrl}
-            data-width="500"
-            data-show-text="true"
-          />
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+              <AlertCircle className="w-8 h-8 mb-2" />
+              <p>{error}</p>
+            </div>
+          ) : post ? (
+            <a 
+              href={post.permalink_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block max-w-lg w-full bg-card rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border border-border"
+            >
+              {post.full_picture && (
+                <div className="aspect-video overflow-hidden">
+                  <img 
+                    src={post.full_picture} 
+                    alt="Post Facebook"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              <div className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-[#1877F2] flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground">Pensiero Perante</p>
+                    <p className="text-sm text-muted-foreground">{formatDate(post.created_time)}</p>
+                  </div>
+                </div>
+                {post.message && (
+                  <p className="text-foreground line-clamp-4">
+                    {post.message}
+                  </p>
+                )}
+              </div>
+            </a>
+          ) : null}
         </motion.div>
 
         <motion.div
