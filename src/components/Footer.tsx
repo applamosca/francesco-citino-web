@@ -150,8 +150,19 @@ const Footer = () => {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="flex flex-col items-start md:items-end justify-center gap-3"
           >
-            <div className="text-sm">
-              © {new Date().getFullYear()} Francesco Citino. Tutti i diritti riservati.
+          <div className="text-sm space-y-1">
+              <div>© {new Date().getFullYear()} Francesco Citino. Tutti i diritti riservati.</div>
+              <div className="text-muted-foreground">
+                Sito progettato da{" "}
+                <a 
+                  href="https://assistenzabat.it/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline transition-colors"
+                >
+                  ANTONIO DANZI
+                </a>
+              </div>
             </div>
             
             {/* Visit Counter with Counting Animation */}
