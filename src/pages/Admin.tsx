@@ -63,13 +63,13 @@ const Admin = () => {
 
   const updateContentMutation = useUpdateContent();
 
-  // Check OTP requirement when admin logs in
-  useEffect(() => {
-    if (session && isAdmin && user && !otpChecked) {
-      setOtpChecked(true);
-      sendOTP(user.id, user.email || "");
-    }
-  }, [session, isAdmin, user, otpChecked, sendOTP]);
+  // OTP temporarily disabled - domain email not yet configured
+  // useEffect(() => {
+  //   if (session && isAdmin && user && !otpChecked) {
+  //     setOtpChecked(true);
+  //     sendOTP(user.id, user.email || "");
+  //   }
+  // }, [session, isAdmin, user, otpChecked, sendOTP]);
 
   // Redirect if not authenticated or not admin (only after loading completes)
   useEffect(() => {
@@ -149,17 +149,17 @@ const Admin = () => {
     }
   };
 
-  // Show OTP verification screen for admins
-  if (session && isAdmin && isOTPRequired && !isVerified) {
-    return (
-      <OTPVerification
-        onVerify={handleVerifyOTP}
-        onResend={handleResendOTP}
-        isLoading={otpLoading}
-        email={user?.email || ""}
-      />
-    );
-  }
+  // OTP verification temporarily disabled
+  // if (session && isAdmin && isOTPRequired && !isVerified) {
+  //   return (
+  //     <OTPVerification
+  //       onVerify={handleVerifyOTP}
+  //       onResend={handleResendOTP}
+  //       isLoading={otpLoading}
+  //       email={user?.email || ""}
+  //     />
+  //   );
+  // }
 
   // Show loading while checking auth
   if (loading || isAdminLoading || !session || !isAdmin) {
