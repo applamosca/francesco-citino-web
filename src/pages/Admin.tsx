@@ -149,15 +149,15 @@ const Admin = () => {
     }
   };
 
-  // Show OTP verification screen for admins
-  if (session && isAdmin && isOTPRequired && !isVerified) {
-    return (
-      <OTPVerification
-        onVerify={handleVerifyOTP}
-        onResend={handleResendOTP}
-        isLoading={otpLoading}
-        email={user?.email || ""}
-      />
+  // OTP verification temporarily disabled
+  // if (session && isAdmin && isOTPRequired && !isVerified) {
+  //   return (
+  //     <OTPVerification
+  //       onVerify={handleVerifyOTP}
+  //       onResend={handleResendOTP}
+  //       isLoading={otpLoading}
+  //       email={user?.email || ""}
+  //     />
     );
   }
 
