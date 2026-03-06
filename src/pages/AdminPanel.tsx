@@ -57,13 +57,13 @@ const adminSections = [
 const AdminPanel = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, isAdmin, loading, signOut } = useAuth();
+  const { user, isAdmin, isAdminLoading, loading, signOut } = useAuth();
 
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
     }
-    if (!loading && user && !isAdmin) {
+    if (!loading && !isAdminLoading && user && !isAdmin) {
       toast({
         title: "Accesso negato",
         description: "Non hai i permessi per accedere a questa pagina",
@@ -71,7 +71,7 @@ const AdminPanel = () => {
       });
       navigate('/');
     }
-  }, [user, isAdmin, loading, navigate, toast]);
+  }, [user, isAdmin, isAdminLoading, loading, navigate, toast]);
 
   const handleLogout = async () => {
     const { error } = await signOut();
