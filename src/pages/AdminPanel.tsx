@@ -45,6 +45,13 @@ const adminSections = [
     path: "/admin",
     color: "text-orange-500",
   },
+  {
+    title: "Blog",
+    description: "Gestisci articoli, categorie e tag del blog",
+    icon: BookOpen,
+    path: "/admin/blog",
+    color: "text-purple-500",
+  },
 ];
 
 const AdminPanel = () => {
