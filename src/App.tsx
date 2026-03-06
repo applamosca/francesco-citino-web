@@ -12,6 +12,7 @@ import AdminGallery from "./pages/AdminGallery";
 import AdminFacebook from "./pages/AdminFacebook";
 import AdminTopics from "./pages/AdminTopics";
 import AdminSecurity from "./pages/AdminSecurity";
+import AdminBlog from "./pages/AdminBlog";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 
@@ -41,6 +42,7 @@ const App = () => (
           <Route path="/admin/facebook" element={<AdminFacebook />} />
           <Route path="/admin/topics" element={<AdminTopics />} />
           <Route path="/admin/security" element={<AdminSecurity />} />
+          <Route path="/admin/blog" element={<AdminBlog />} />
           <Route path="/auth" element={<AuthPage />} />
 
           {/* Booking App */}
