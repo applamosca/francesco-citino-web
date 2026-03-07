@@ -17,7 +17,7 @@ const Index = () => {
         <Hero />
         <ChiSono />
         <Servizi />
-        <FacebookPost />
+        {/* <FacebookPost /> — Disabilitato temporaneamente: token Facebook scaduto */}
         <Blog />
         <Gallery />
         <Libro />
