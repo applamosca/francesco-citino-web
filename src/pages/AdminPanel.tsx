@@ -6,7 +6,6 @@ import {
   ArrowLeft, 
   MessageSquare, 
   Image, 
-  Facebook, 
   FileText, 
   Settings,
   BookOpen
@@ -30,13 +29,6 @@ const adminSections = [
     icon: Image,
     path: "/admin/gallery",
     color: "text-green-500",
-  },
-  {
-    title: "Facebook",
-    description: "Pubblica e programma post su Facebook",
-    icon: Facebook,
-    path: "/admin/facebook",
-    color: "text-indigo-500",
   },
   {
     title: "Contenuti Sito",

@@ -7,7 +7,7 @@ import Gallery from "@/components/Gallery";
 import Libro from "@/components/Libro";
 import Contatti from "@/components/Contatti";
 import Footer from "@/components/Footer";
-import FacebookPost from "@/components/FacebookPost";
+
 
 const Index = () => {
   return (
@@ -17,7 +17,7 @@ const Index = () => {
         <Hero />
         <ChiSono />
         <Servizi />
-        {/* <FacebookPost /> — Disabilitato temporaneamente: token Facebook scaduto */}
+        
         <Blog />
         <Gallery />
         <Libro />
