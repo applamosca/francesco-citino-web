@@ -6,16 +6,7 @@ verify_jwt = false
 [functions.create-book-order]
 verify_jwt = false
 
-[functions.facebook-post]
-verify_jwt = false
-
-[functions.process-scheduled-posts]
-verify_jwt = false
-
 [functions.blog-admin]
-verify_jwt = false
-
-[functions.generate-ai-post]
 verify_jwt = false
 
 [functions.verify-turnstile]
@@ -28,9 +19,6 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.admin-otp]
-verify_jwt = false
-
-[functions.get-facebook-posts]
 verify_jwt = false
 
 [functions.send-appointment-notification]
