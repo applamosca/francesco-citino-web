@@ -37,8 +37,6 @@ const App = () => (
           <Route path="/admin/messages" element={<AdminNew />} />
           <Route path="/admin/panel" element={<AdminPanel />} />
           <Route path="/admin/gallery" element={<AdminGallery />} />
-          <Route path="/admin/facebook" element={<AdminFacebook />} />
-          <Route path="/admin/topics" element={<AdminTopics />} />
           <Route path="/admin/security" element={<AdminSecurity />} />
           <Route path="/admin/blog" element={<AdminBlog />} />
           <Route path="/auth" element={<AuthPage />} />
