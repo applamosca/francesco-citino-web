@@ -9,8 +9,6 @@ import Admin from "./pages/Admin";
 import AdminNew from "./pages/AdminNew";
 import AdminPanel from "./pages/AdminPanel";
 import AdminGallery from "./pages/AdminGallery";
-import AdminFacebook from "./pages/AdminFacebook";
-import AdminTopics from "./pages/AdminTopics";
 import AdminSecurity from "./pages/AdminSecurity";
 import AdminBlog from "./pages/AdminBlog";
 import AuthPage from "./pages/AuthPage";
