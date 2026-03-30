@@ -76,7 +76,7 @@ const Hero = () => {
           <Button
             onClick={scrollToLibro}
             size="lg"
-            className="bg-[hsl(220,80%,20%)] hover:bg-[hsl(220,80%,15%)] text-white px-12 py-7 text-2xl font-bold rounded-full transition-all duration-300 hover:scale-105 tracking-widest uppercase w-full max-w-xs"
+            className="bg-[hsl(45,100%,50%)] hover:bg-[hsl(45,100%,45%)] text-[hsl(220,80%,20%)] px-12 py-7 text-2xl font-bold rounded-full transition-all duration-300 hover:scale-105 tracking-widest uppercase w-full max-w-xs"
           >
             IL LIBRO
           </Button>
