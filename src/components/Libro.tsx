@@ -2,10 +2,12 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { useContent, type LibroContent } from "@/hooks/useContent";
+import { useBookStock, useDecrementStock } from "@/hooks/useBookStock";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { ExternalLink, CheckCircle2, Users, Lightbulb, BookOpen, ShoppingCart } from "lucide-react";
+import { ExternalLink, CheckCircle2, Users, Lightbulb, BookOpen, ShoppingCart, Package, AlertTriangle } from "lucide-react";
 import { BookPurchaseForm } from "@/components/BookPurchaseForm";
+import { toast } from "sonner";
 import bookCover from "@/assets/libro-cover.jpg";
 
 const Libro = () => {
