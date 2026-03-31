@@ -131,12 +131,12 @@ const Libro = () => {
                       Acquista il Libro Online
                     </Button>
                   )}
-                  {stockAvailable && libroContent.purchaseUrl && libroContent.purchaseUrl !== "#" && (
+                  {stockAvailable && (
                     <Button
                       size="lg"
                       variant="outline"
                       className="flex-1 text-lg py-6"
-                      onClick={() => window.open(libroContent.purchaseUrl, "_blank")}
+                      onClick={() => window.open("https://www.amazon.it/GEOMETRIA-SEGRETA-DELLA-MENTE-ebook/dp/B0FKNFTNTS", "_blank")}
                     >
                       Acquista Ebook
                       <ExternalLink className="ml-2" size={20} />
