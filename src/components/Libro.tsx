@@ -131,8 +131,7 @@ const Libro = () => {
                       Acquista il Libro Online
                     </Button>
                   )}
-                  {stockAvailable && (
-                    <Button
+                  <Button
                       size="lg"
                       variant="outline"
                       className="flex-1 text-lg py-6"
@@ -141,7 +140,6 @@ const Libro = () => {
                       Acquista Ebook
                       <ExternalLink className="ml-2" size={20} />
                     </Button>
-                  )}
                 </div>
               </motion.div>
             </div>
