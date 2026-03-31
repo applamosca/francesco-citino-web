@@ -138,7 +138,7 @@ const Libro = () => {
                       className="flex-1 text-lg py-6"
                       onClick={() => window.open(libroContent.purchaseUrl, "_blank")}
                     >
-                      Amazon
+                      Acquista Ebook
                       <ExternalLink className="ml-2" size={20} />
                     </Button>
                   )}
