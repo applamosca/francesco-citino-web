@@ -12,6 +12,10 @@ interface GalleryPhoto {
   display_order: number;
 }
 
+const isVideoUrl = (url: string): boolean => {
+  return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url);
+};
+
 const Gallery = () => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [zoom, setZoom] = useState(1);
