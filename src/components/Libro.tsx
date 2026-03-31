@@ -106,7 +106,7 @@ const Libro = () => {
                   <div className="flex items-center gap-2 mb-4 p-3 bg-muted rounded-lg">
                     <AlertTriangle className="text-muted-foreground" size={20} />
                     <p className="text-sm text-muted-foreground">
-                      Copie fisiche esaurite — disponibile in formato Ebook
+                      Copie fisiche esaurite — disponibile online
                     </p>
                   </div>
                 )}
