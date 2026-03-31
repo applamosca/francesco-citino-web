@@ -15,7 +15,12 @@ const Libro = () => {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { data: content, isLoading } = useContent("libro");
   const libroContent = content as unknown as LibroContent;
+  const { data: bookData } = useBookStock();
+  const decrementStock = useDecrementStock();
   const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
+
+  const stockAvailable = bookData ? bookData.stock_physic > 0 : true;
+  const amazonUrl = bookData?.amazon_ebook_url || "https://www.amazon.it";
 
   if (isLoading || !libroContent) {
     return (
