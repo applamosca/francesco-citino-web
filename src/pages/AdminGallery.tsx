@@ -350,7 +350,7 @@ const AdminGallery = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="image">Carica Immagine</Label>
+                  <Label htmlFor="image">Carica Immagine o Video</Label>
                   <div className="flex gap-2">
                     <Input
                       id="image"
