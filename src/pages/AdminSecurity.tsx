@@ -53,7 +53,7 @@ import { it } from "date-fns/locale";
 const AdminSecurity = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { session, isAdmin } = useAuth();
+  const { user, session, isAdmin, isAdminLoading, loading } = useAuth();
   
   const { data: logs, isLoading: logsLoading, refetch: refetchLogs } = useAccessLogs(100);
   const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useSecurityStats();
