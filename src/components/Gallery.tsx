@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { Camera, X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCcw, Play } from "lucide-react";
 
 interface GalleryPhoto {
   id: string;
@@ -11,6 +11,10 @@ interface GalleryPhoto {
   image_url: string;
   display_order: number;
 }
+
+const isVideoUrl = (url: string): boolean => {
+  return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url);
+};
 
 const Gallery = () => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -195,14 +199,31 @@ const Gallery = () => {
                 onClick={() => openLightbox(index)}
                 className="group relative aspect-square overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 cursor-pointer"
               >
-                <motion.img
-                  src={photo.image_url}
-                  alt={photo.title}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ duration: 0.5 }}
-                />
+                {isVideoUrl(photo.image_url) ? (
+                  <div className="w-full h-full relative">
+                    <video
+                      src={photo.image_url}
+                      className="w-full h-full object-cover"
+                      muted
+                      playsInline
+                      preload="metadata"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-14 h-14 rounded-full bg-black/60 flex items-center justify-center">
+                        <Play className="w-7 h-7 text-white ml-1" />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <motion.img
+                    src={photo.image_url}
+                    alt={photo.title}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ duration: 0.5 }}
+                  />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                     <h3 className="text-xl font-bold text-white mb-2">
@@ -334,24 +355,34 @@ const Gallery = () => {
                 className="overflow-hidden rounded-lg"
                 style={{ cursor: zoom > 1 ? "grab" : "default" }}
               >
-                <motion.img
-                  src={photos[selectedIndex].image_url}
-                  alt={photos[selectedIndex].title}
-                  className="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl select-none"
-                  drag={zoom > 1}
-                  dragConstraints={constraintsRef}
-                  dragElastic={0.1}
-                  onDragEnd={handleDragEnd}
-                  onDoubleClick={handleDoubleTap}
-                  animate={{
-                    scale: zoom,
-                    x: position.x,
-                    y: position.y,
-                  }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  style={{ touchAction: "none" }}
-                  whileDrag={{ cursor: "grabbing" }}
-                />
+                {isVideoUrl(photos[selectedIndex].image_url) ? (
+                  <video
+                    src={photos[selectedIndex].image_url}
+                    className="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl"
+                    controls
+                    autoPlay
+                    playsInline
+                  />
+                ) : (
+                  <motion.img
+                    src={photos[selectedIndex].image_url}
+                    alt={photos[selectedIndex].title}
+                    className="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl select-none"
+                    drag={zoom > 1}
+                    dragConstraints={constraintsRef}
+                    dragElastic={0.1}
+                    onDragEnd={handleDragEnd}
+                    onDoubleClick={handleDoubleTap}
+                    animate={{
+                      scale: zoom,
+                      x: position.x,
+                      y: position.y,
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    style={{ touchAction: "none" }}
+                    whileDrag={{ cursor: "grabbing" }}
+                  />
+                )}
               </motion.div>
 
               {/* Swipe hint for mobile */}

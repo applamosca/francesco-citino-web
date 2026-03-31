@@ -104,13 +104,7 @@ const Contatti = () => {
                 onClick={() => window.location.href = `mailto:${deobfuscateEmail(contattiContent.email)}`}
               >
                 <Mail className="mr-4 text-primary group-hover:scale-110 transition-transform duration-300" size={24} />
-                <div>
-                  <p className="font-semibold text-foreground text-base">Email</p>
-                  {/* Email obfuscated to prevent spam bot harvesting */}
-                  <p className="text-muted-foreground text-sm" aria-label="Indirizzo email">
-                    {obfuscateEmail(contattiContent.email)}
-                  </p>
-                </div>
+                <p className="font-semibold text-foreground text-base">Email</p>
               </Button>
 
               <Button
@@ -122,7 +116,10 @@ const Contatti = () => {
                 <img src={whatsappLogo} alt="WhatsApp" className="mr-4 w-6 h-6 group-hover:scale-110 transition-transform duration-300" />
                 <div>
                   <p className="font-semibold text-foreground text-base">WhatsApp</p>
-                  <p className="text-muted-foreground text-sm">+39 320 197 1983</p>
+                  <p className="text-muted-foreground text-sm">
+                    <Phone className="inline-block w-3.5 h-3.5 mr-1 -mt-0.5" />
+                    +39 320 197 1983
+                  </p>
                 </div>
               </Button>
             </div>

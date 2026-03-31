@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, Reorder } from "framer-motion";
-import { LogOut, ArrowLeft, Plus, Trash2, Eye, EyeOff, GripVertical, Upload, Save } from "lucide-react";
+import { LogOut, ArrowLeft, Plus, Trash2, Eye, EyeOff, GripVertical, Upload, Save, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,6 +21,10 @@ interface GalleryPhoto {
   is_visible: boolean;
   created_at: string;
 }
+
+const isVideoUrl = (url: string): boolean => {
+  return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url);
+};
 
 const AdminGallery = () => {
   const navigate = useNavigate();
@@ -331,7 +335,7 @@ const AdminGallery = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Plus className="h-5 w-5" />
-                Aggiungi Nuova Foto
+                Aggiungi Foto o Video
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -346,12 +350,12 @@ const AdminGallery = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="image">Carica Immagine</Label>
+                  <Label htmlFor="image">Carica Immagine o Video</Label>
                   <div className="flex gap-2">
                     <Input
                       id="image"
                       type="file"
-                      accept="image/*"
+                      accept="image/*,video/mp4,video/webm,video/ogg,video/quicktime"
                       onChange={handleFileChange}
                       className="flex-1"
                     />
@@ -389,7 +393,7 @@ const AdminGallery = () => {
                     ) : (
                       <>
                         <Upload className="mr-2 h-4 w-4" />
-                        Aggiungi Foto
+                        Aggiungi
                       </>
                     )}
                   </Button>
@@ -455,11 +459,17 @@ const AdminGallery = () => {
                       } transition-colors`}
                     >
                       <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                      <img
-                        src={photo.image_url}
-                        alt={photo.title}
-                        className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
-                      />
+                      {isVideoUrl(photo.image_url) ? (
+                        <div className="w-16 h-16 rounded-lg flex-shrink-0 relative bg-muted flex items-center justify-center">
+                          <Video className="h-6 w-6 text-primary" />
+                        </div>
+                      ) : (
+                        <img
+                          src={photo.image_url}
+                          alt={photo.title}
+                          className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+                        />
+                      )}
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium text-foreground truncate">{photo.title}</h3>
                         {photo.description && (
