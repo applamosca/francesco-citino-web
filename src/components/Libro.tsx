@@ -2,10 +2,12 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { useContent, type LibroContent } from "@/hooks/useContent";
+import { useBookStock, useDecrementStock } from "@/hooks/useBookStock";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { ExternalLink, CheckCircle2, Users, Lightbulb, BookOpen, ShoppingCart } from "lucide-react";
+import { ExternalLink, CheckCircle2, Users, Lightbulb, BookOpen, ShoppingCart, Package, AlertTriangle } from "lucide-react";
 import { BookPurchaseForm } from "@/components/BookPurchaseForm";
+import { toast } from "sonner";
 import bookCover from "@/assets/libro-cover.jpg";
 
 const Libro = () => {
@@ -13,7 +15,12 @@ const Libro = () => {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { data: content, isLoading } = useContent("libro");
   const libroContent = content as unknown as LibroContent;
+  const { data: bookData } = useBookStock();
+  const decrementStock = useDecrementStock();
   const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
+
+  const stockAvailable = bookData ? bookData.stock_physic > 0 : true;
+  const amazonUrl = bookData?.amazon_ebook_url || "https://www.amazon.it";
 
   if (isLoading || !libroContent) {
     return (
@@ -85,16 +92,46 @@ const Libro = () => {
                   {libroContent.secondDescription}
                 </p>
 
+                {/* Stock indicator */}
+                {bookData && stockAvailable && (
+                  <div className="flex items-center gap-2 mb-4 p-3 bg-accent/10 rounded-lg">
+                    <Package className="text-accent" size={20} />
+                    <p className="text-sm font-semibold text-accent">
+                      Solo {bookData.stock_physic} copie fisiche rimaste!
+                    </p>
+                  </div>
+                )}
+
+                {bookData && !stockAvailable && (
+                  <div className="flex items-center gap-2 mb-4 p-3 bg-muted rounded-lg">
+                    <AlertTriangle className="text-muted-foreground" size={20} />
+                    <p className="text-sm text-muted-foreground">
+                      Copie fisiche esaurite — disponibile in formato Ebook
+                    </p>
+                  </div>
+                )}
+
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <Button
-                    size="lg"
-                    className="bg-primary hover:bg-accent text-primary-foreground flex-1 text-lg py-6"
-                    onClick={() => setIsOrderDialogOpen(true)}
-                  >
-                    <ShoppingCart className="mr-2" size={20} />
-                    Acquista Ora
-                  </Button>
-                  {libroContent.purchaseUrl && libroContent.purchaseUrl !== "#" && (
+                  {stockAvailable ? (
+                    <Button
+                      size="lg"
+                      className="bg-primary hover:bg-accent text-primary-foreground flex-1 text-lg py-6"
+                      onClick={() => setIsOrderDialogOpen(true)}
+                    >
+                      <ShoppingCart className="mr-2" size={20} />
+                      Acquista Copia Fisica
+                    </Button>
+                  ) : (
+                    <Button
+                      size="lg"
+                      className="bg-primary hover:bg-accent text-primary-foreground flex-1 text-lg py-6"
+                      onClick={() => window.open(amazonUrl, "_blank")}
+                    >
+                      <ExternalLink className="mr-2" size={20} />
+                      Acquista Ebook su Amazon
+                    </Button>
+                  )}
+                  {stockAvailable && libroContent.purchaseUrl && libroContent.purchaseUrl !== "#" && (
                     <Button
                       size="lg"
                       variant="outline"
@@ -217,14 +254,25 @@ const Libro = () => {
                 <p className="text-xl font-semibold text-primary mb-4">
                   Inizia oggi il tuo viaggio alla scoperta della geometria nascosta della tua mente.
                 </p>
-                <Button
-                  size="lg"
-                  className="bg-primary hover:bg-accent text-primary-foreground text-lg px-8 py-6"
-                  onClick={() => setIsOrderDialogOpen(true)}
-                >
-                  <ShoppingCart className="mr-2" size={20} />
-                  Acquista il Libro
-                </Button>
+                {stockAvailable ? (
+                  <Button
+                    size="lg"
+                    className="bg-primary hover:bg-accent text-primary-foreground text-lg px-8 py-6"
+                    onClick={() => setIsOrderDialogOpen(true)}
+                  >
+                    <ShoppingCart className="mr-2" size={20} />
+                    Acquista il Libro
+                  </Button>
+                ) : (
+                  <Button
+                    size="lg"
+                    className="bg-primary hover:bg-accent text-primary-foreground text-lg px-8 py-6"
+                    onClick={() => window.open(amazonUrl, "_blank")}
+                  >
+                    <ExternalLink className="mr-2" size={20} />
+                    Acquista Ebook su Amazon
+                  </Button>
+                )}
               </div>
             </motion.div>
           )}

@@ -464,6 +464,33 @@ export type Database = {
         }
         Relationships: []
       }
+      books: {
+        Row: {
+          amazon_ebook_url: string
+          created_at: string
+          id: string
+          stock_physic: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          amazon_ebook_url?: string
+          created_at?: string
+          id?: string
+          stock_physic?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          amazon_ebook_url?: string
+          created_at?: string
+          id?: string
+          stock_physic?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           created_at: string
@@ -748,6 +775,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      decrement_book_stock: { Args: { book_id: string }; Returns: boolean }
       get_security_stats: {
         Args: never
         Returns: {
