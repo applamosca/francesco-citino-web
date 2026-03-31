@@ -355,24 +355,34 @@ const Gallery = () => {
                 className="overflow-hidden rounded-lg"
                 style={{ cursor: zoom > 1 ? "grab" : "default" }}
               >
-                <motion.img
-                  src={photos[selectedIndex].image_url}
-                  alt={photos[selectedIndex].title}
-                  className="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl select-none"
-                  drag={zoom > 1}
-                  dragConstraints={constraintsRef}
-                  dragElastic={0.1}
-                  onDragEnd={handleDragEnd}
-                  onDoubleClick={handleDoubleTap}
-                  animate={{
-                    scale: zoom,
-                    x: position.x,
-                    y: position.y,
-                  }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  style={{ touchAction: "none" }}
-                  whileDrag={{ cursor: "grabbing" }}
-                />
+                {isVideoUrl(photos[selectedIndex].image_url) ? (
+                  <video
+                    src={photos[selectedIndex].image_url}
+                    className="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl"
+                    controls
+                    autoPlay
+                    playsInline
+                  />
+                ) : (
+                  <motion.img
+                    src={photos[selectedIndex].image_url}
+                    alt={photos[selectedIndex].title}
+                    className="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl select-none"
+                    drag={zoom > 1}
+                    dragConstraints={constraintsRef}
+                    dragElastic={0.1}
+                    onDragEnd={handleDragEnd}
+                    onDoubleClick={handleDoubleTap}
+                    animate={{
+                      scale: zoom,
+                      x: position.x,
+                      y: position.y,
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    style={{ touchAction: "none" }}
+                    whileDrag={{ cursor: "grabbing" }}
+                  />
+                )}
               </motion.div>
 
               {/* Swipe hint for mobile */}
