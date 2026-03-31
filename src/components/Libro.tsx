@@ -106,7 +106,7 @@ const Libro = () => {
                   <div className="flex items-center gap-2 mb-4 p-3 bg-muted rounded-lg">
                     <AlertTriangle className="text-muted-foreground" size={20} />
                     <p className="text-sm text-muted-foreground">
-                      Copie fisiche esaurite — disponibile in formato Ebook
+                      Copie fisiche esaurite — disponibile online
                     </p>
                   </div>
                 )}
@@ -128,7 +128,7 @@ const Libro = () => {
                       onClick={() => window.open(amazonUrl, "_blank")}
                     >
                       <ExternalLink className="mr-2" size={20} />
-                      Acquista Ebook su Amazon
+                      Acquista il Libro Online
                     </Button>
                   )}
                   {stockAvailable && libroContent.purchaseUrl && libroContent.purchaseUrl !== "#" && (
@@ -270,7 +270,7 @@ const Libro = () => {
                     onClick={() => window.open(amazonUrl, "_blank")}
                   >
                     <ExternalLink className="mr-2" size={20} />
-                    Acquista Ebook su Amazon
+                    Acquista il Libro Online
                   </Button>
                 )}
               </div>
