@@ -58,19 +58,17 @@ serve(async (req: Request): Promise<Response> => {
 
       // Generate new OTP
       const otpCode = generateOTP();
-      const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
-      // Save OTP to database
-      const { error: insertError } = await supabase
-        .from("admin_otp_codes")
-        .insert({
-          user_id: userId,
-          code: otpCode,
-          expires_at: expiresAt,
-        });
+      // Hash the OTP before storing using pgcrypto via raw SQL
+      const { error: hashError } = await supabase.rpc("store_hashed_otp", {
+        _user_id: userId,
+        _code: otpCode,
+        _expires_at: expiresAt,
+      });
 
-      if (insertError) {
-        console.error("Error inserting OTP:", insertError);
+      if (hashError) {
+        console.error("Error inserting hashed OTP:", hashError);
         throw new Error("Failed to generate OTP");
       }
 
@@ -116,7 +114,7 @@ serve(async (req: Request): Promise<Response> => {
 
         console.log(`OTP sent to ${email}`);
       } else {
-        console.log(`OTP for ${email}: ${otpCode} (email disabled)`);
+        console.log(`OTP generated for ${email} (email disabled)`);
       }
 
       return new Response(
@@ -129,31 +127,27 @@ serve(async (req: Request): Promise<Response> => {
         throw new Error("userId and code are required for verification");
       }
 
-      // Find valid OTP
-      const { data: otpRecord, error: fetchError } = await supabase
-        .from("admin_otp_codes")
-        .select("*")
-        .eq("user_id", userId)
-        .eq("code", code)
-        .eq("used", false)
-        .gt("expires_at", new Date().toISOString())
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
+      // Verify OTP using the hashed comparison function
+      const { data: isValid, error: verifyError } = await supabase.rpc("verify_hashed_otp", {
+        _user_id: userId,
+        _code: code,
+      });
 
-      if (fetchError || !otpRecord) {
+      if (verifyError) {
+        console.error("OTP verification error:", verifyError);
+        return new Response(
+          JSON.stringify({ success: false, error: "Errore di verifica" }),
+          { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        );
+      }
+
+      if (!isValid) {
         console.log(`Invalid OTP attempt for user ${userId}`);
         return new Response(
           JSON.stringify({ success: false, error: "Codice non valido o scaduto" }),
           { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
         );
       }
-
-      // Mark OTP as used
-      await supabase
-        .from("admin_otp_codes")
-        .update({ used: true })
-        .eq("id", otpRecord.id);
 
       console.log(`OTP verified successfully for user ${userId}`);
 
