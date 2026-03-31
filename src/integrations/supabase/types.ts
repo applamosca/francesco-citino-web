@@ -775,6 +775,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      decrement_book_stock: { Args: { book_id: string }; Returns: boolean }
       get_security_stats: {
         Args: never
         Returns: {
