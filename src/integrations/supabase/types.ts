@@ -797,6 +797,14 @@ export type Database = {
         Returns: boolean
       }
       increment_visit_count: { Args: never; Returns: undefined }
+      store_hashed_otp: {
+        Args: { _code: string; _expires_at: string; _user_id: string }
+        Returns: undefined
+      }
+      verify_hashed_otp: {
+        Args: { _code: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "user"
