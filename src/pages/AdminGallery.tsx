@@ -22,6 +22,10 @@ interface GalleryPhoto {
   created_at: string;
 }
 
+const isVideoUrl = (url: string): boolean => {
+  return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url);
+};
+
 const AdminGallery = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
