@@ -92,16 +92,46 @@ const Libro = () => {
                   {libroContent.secondDescription}
                 </p>
 
+                {/* Stock indicator */}
+                {bookData && stockAvailable && (
+                  <div className="flex items-center gap-2 mb-4 p-3 bg-accent/10 rounded-lg">
+                    <Package className="text-accent" size={20} />
+                    <p className="text-sm font-semibold text-accent">
+                      Solo {bookData.stock_physic} copie fisiche rimaste!
+                    </p>
+                  </div>
+                )}
+
+                {bookData && !stockAvailable && (
+                  <div className="flex items-center gap-2 mb-4 p-3 bg-muted rounded-lg">
+                    <AlertTriangle className="text-muted-foreground" size={20} />
+                    <p className="text-sm text-muted-foreground">
+                      Copie fisiche esaurite — disponibile in formato Ebook
+                    </p>
+                  </div>
+                )}
+
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <Button
-                    size="lg"
-                    className="bg-primary hover:bg-accent text-primary-foreground flex-1 text-lg py-6"
-                    onClick={() => setIsOrderDialogOpen(true)}
-                  >
-                    <ShoppingCart className="mr-2" size={20} />
-                    Acquista Ora
-                  </Button>
-                  {libroContent.purchaseUrl && libroContent.purchaseUrl !== "#" && (
+                  {stockAvailable ? (
+                    <Button
+                      size="lg"
+                      className="bg-primary hover:bg-accent text-primary-foreground flex-1 text-lg py-6"
+                      onClick={() => setIsOrderDialogOpen(true)}
+                    >
+                      <ShoppingCart className="mr-2" size={20} />
+                      Acquista Copia Fisica
+                    </Button>
+                  ) : (
+                    <Button
+                      size="lg"
+                      className="bg-primary hover:bg-accent text-primary-foreground flex-1 text-lg py-6"
+                      onClick={() => window.open(amazonUrl, "_blank")}
+                    >
+                      <ExternalLink className="mr-2" size={20} />
+                      Acquista Ebook su Amazon
+                    </Button>
+                  )}
+                  {stockAvailable && libroContent.purchaseUrl && libroContent.purchaseUrl !== "#" && (
                     <Button
                       size="lg"
                       variant="outline"
