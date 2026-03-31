@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, Reorder } from "framer-motion";
-import { LogOut, ArrowLeft, Plus, Trash2, Eye, EyeOff, GripVertical, Upload, Save } from "lucide-react";
+import { LogOut, ArrowLeft, Plus, Trash2, Eye, EyeOff, GripVertical, Upload, Save, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
