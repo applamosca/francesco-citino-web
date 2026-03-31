@@ -459,11 +459,17 @@ const AdminGallery = () => {
                       } transition-colors`}
                     >
                       <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                      <img
-                        src={photo.image_url}
-                        alt={photo.title}
-                        className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
-                      />
+                      {isVideoUrl(photo.image_url) ? (
+                        <div className="w-16 h-16 rounded-lg flex-shrink-0 relative bg-muted flex items-center justify-center">
+                          <Video className="h-6 w-6 text-primary" />
+                        </div>
+                      ) : (
+                        <img
+                          src={photo.image_url}
+                          alt={photo.title}
+                          className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+                        />
+                      )}
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium text-foreground truncate">{photo.title}</h3>
                         {photo.description && (
