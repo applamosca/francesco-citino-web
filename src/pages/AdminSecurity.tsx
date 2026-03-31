@@ -92,14 +92,10 @@ const AdminSecurity = () => {
   }, [refetchBlocked, toast]);
 
   useEffect(() => {
-    if (!session) {
-      toast({
-        title: "Accesso negato",
-        description: "Devi effettuare il login",
-        variant: "destructive",
-      });
+    if (!loading && !user) {
       navigate("/auth");
-    } else if (!isAdmin) {
+    }
+    if (!loading && !isAdminLoading && user && !isAdmin) {
       toast({
         title: "Accesso negato",
         description: "Non hai i permessi per accedere a questa pagina",
@@ -107,7 +103,7 @@ const AdminSecurity = () => {
       });
       navigate("/");
     }
-  }, [session, isAdmin, navigate, toast]);
+  }, [user, isAdmin, isAdminLoading, loading, navigate, toast]);
 
   const handleRefresh = () => {
     refetchLogs();
