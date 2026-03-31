@@ -270,7 +270,7 @@ const Libro = () => {
                     onClick={() => window.open(amazonUrl, "_blank")}
                   >
                     <ExternalLink className="mr-2" size={20} />
-                    Acquista Ebook su Amazon
+                    Acquista il Libro Online
                   </Button>
                 )}
               </div>
