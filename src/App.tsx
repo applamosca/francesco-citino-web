@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
+import GalleryPage from "./pages/GalleryPage";
 import AdminNew from "./pages/AdminNew";
 import AdminPanel from "./pages/AdminPanel";
 import AdminGallery from "./pages/AdminGallery";
