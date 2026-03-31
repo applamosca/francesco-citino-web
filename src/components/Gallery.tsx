@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { Camera, X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCcw, Play } from "lucide-react";
 
 interface GalleryPhoto {
   id: string;
