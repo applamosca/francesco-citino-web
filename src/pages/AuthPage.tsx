@@ -49,7 +49,7 @@ const AuthPage = () => {
           title: "Successo",
           description: isLogin ? "Login effettuato" : "Registrazione completata",
         });
-        navigate('/admin');
+        navigate('/admin/panel');
       }
     } catch (error) {
       toast({
