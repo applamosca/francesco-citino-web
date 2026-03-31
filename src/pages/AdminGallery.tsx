@@ -355,7 +355,7 @@ const AdminGallery = () => {
                     <Input
                       id="image"
                       type="file"
-                      accept="image/*"
+                      accept="image/*,video/mp4,video/webm,video/ogg,video/quicktime"
                       onChange={handleFileChange}
                       className="flex-1"
                     />
