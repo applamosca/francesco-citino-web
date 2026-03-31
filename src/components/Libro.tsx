@@ -274,7 +274,6 @@ const Libro = () => {
                   </Button>
                 )}
               </div>
-              </div>
             </motion.div>
           )}
         </motion.div>
