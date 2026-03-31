@@ -199,14 +199,31 @@ const Gallery = () => {
                 onClick={() => openLightbox(index)}
                 className="group relative aspect-square overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 cursor-pointer"
               >
-                <motion.img
-                  src={photo.image_url}
-                  alt={photo.title}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ duration: 0.5 }}
-                />
+                {isVideoUrl(photo.image_url) ? (
+                  <div className="w-full h-full relative">
+                    <video
+                      src={photo.image_url}
+                      className="w-full h-full object-cover"
+                      muted
+                      playsInline
+                      preload="metadata"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-14 h-14 rounded-full bg-black/60 flex items-center justify-center">
+                        <Play className="w-7 h-7 text-white ml-1" />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <motion.img
+                    src={photo.image_url}
+                    alt={photo.title}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ duration: 0.5 }}
+                  />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                     <h3 className="text-xl font-bold text-white mb-2">
