@@ -71,25 +71,19 @@ export const ContactForm = () => {
     setIsSubmitting(true);
 
     try {
-      // Sanitize and submit
+      // Sanitize and submit via edge function (direct DB insert is blocked by RLS)
       const sanitizedData = {
         name: sanitizeText(result.data.name),
         email: result.data.email.toLowerCase().trim(),
         message: sanitizeText(result.data.message),
       };
 
-      const { error } = await supabase
-        .from('contact_messages')
-        .insert(sanitizedData);
+      const { data: fnResponse, error } = await supabase.functions.invoke('send-contact-notification', {
+        body: sanitizedData,
+      });
 
       if (error) throw error;
-
-      // Send email notification (fire and forget - don't block UI)
-      supabase.functions.invoke('send-contact-notification', {
-        body: sanitizedData,
-      }).catch(err => {
-        console.error('Email notification failed:', err);
-      });
+      if (fnResponse?.error) throw new Error(fnResponse.error);
 
       toast({
         title: "Messaggio inviato!",
