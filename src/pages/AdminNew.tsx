@@ -10,7 +10,7 @@ import { AdminMessages } from "@/components/AdminMessages";
 const AdminNew = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, isAdmin, loading, signOut } = useAuth();
+  const { user, isAdmin, isAdminLoading, loading, signOut } = useAuth();
 
   useEffect(() => {
     if (!loading && !user) {
