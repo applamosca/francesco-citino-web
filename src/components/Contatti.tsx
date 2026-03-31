@@ -104,13 +104,7 @@ const Contatti = () => {
                 onClick={() => window.location.href = `mailto:${deobfuscateEmail(contattiContent.email)}`}
               >
                 <Mail className="mr-4 text-primary group-hover:scale-110 transition-transform duration-300" size={24} />
-                <div>
-                  <p className="font-semibold text-foreground text-base">Email</p>
-                  {/* Email obfuscated to prevent spam bot harvesting */}
-                  <p className="text-muted-foreground text-sm" aria-label="Indirizzo email">
-                    {obfuscateEmail(contattiContent.email)}
-                  </p>
-                </div>
+                <p className="font-semibold text-foreground text-base">Email</p>
               </Button>
 
               <Button
