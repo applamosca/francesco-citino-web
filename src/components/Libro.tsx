@@ -254,14 +254,26 @@ const Libro = () => {
                 <p className="text-xl font-semibold text-primary mb-4">
                   Inizia oggi il tuo viaggio alla scoperta della geometria nascosta della tua mente.
                 </p>
-                <Button
-                  size="lg"
-                  className="bg-primary hover:bg-accent text-primary-foreground text-lg px-8 py-6"
-                  onClick={() => setIsOrderDialogOpen(true)}
-                >
-                  <ShoppingCart className="mr-2" size={20} />
-                  Acquista il Libro
-                </Button>
+                {stockAvailable ? (
+                  <Button
+                    size="lg"
+                    className="bg-primary hover:bg-accent text-primary-foreground text-lg px-8 py-6"
+                    onClick={() => setIsOrderDialogOpen(true)}
+                  >
+                    <ShoppingCart className="mr-2" size={20} />
+                    Acquista il Libro
+                  </Button>
+                ) : (
+                  <Button
+                    size="lg"
+                    className="bg-primary hover:bg-accent text-primary-foreground text-lg px-8 py-6"
+                    onClick={() => window.open(amazonUrl, "_blank")}
+                  >
+                    <ExternalLink className="mr-2" size={20} />
+                    Acquista Ebook su Amazon
+                  </Button>
+                )}
+              </div>
               </div>
             </motion.div>
           )}
