@@ -30,7 +30,7 @@ const AdminGallery = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user, isAdmin, loading, signOut } = useAuth();
+  const { user, isAdmin, isAdminLoading, loading, signOut } = useAuth();
   
   const [newPhoto, setNewPhoto] = useState({
     title: "",
