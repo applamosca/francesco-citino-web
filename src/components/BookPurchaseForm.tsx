@@ -26,6 +26,7 @@ interface BookPurchaseFormProps {
 }
 
 export const BookPurchaseForm = ({ onSuccess, bookId, price }: BookPurchaseFormProps) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<ShippingData>({
     name: '',
     email: '',
