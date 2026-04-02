@@ -104,12 +104,24 @@ export const BookPurchaseForm = ({ onSuccess, bookId, price }: BookPurchaseFormP
       if (error) throw error;
       if (orderData?.error) throw new Error(orderData.error);
 
-      setOrderComplete(true);
+      const orderId = orderData?.order?.id || '';
+      const orderRef = orderId.substring(0, 8).toUpperCase();
+
       toast({
         title: "Pagamento completato!",
         description: "Il tuo ordine è stato registrato. Riceverai una email di conferma.",
       });
       onSuccess?.();
+
+      // Redirect to thank you page
+      const params = new URLSearchParams({
+        ref: orderRef,
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        address: formData.shipping_address.trim(),
+        tx: transactionId || '',
+      });
+      navigate(`/grazie?${params.toString()}`);
     } catch (error: any) {
       console.error('Error processing order:', error);
       toast({
