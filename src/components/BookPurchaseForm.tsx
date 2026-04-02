@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { User, Mail, Phone, MapPin, Loader2, CheckCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';

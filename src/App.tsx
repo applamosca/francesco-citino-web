@@ -43,6 +43,7 @@ const App = () => (
           <Route path="/admin/security" element={<AdminSecurity />} />
           <Route path="/admin/blog" element={<AdminBlog />} />
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/grazie" element={<ThankYou />} />
 
           {/* Booking App */}
           <Route path="/booking" element={<BookingHome />} />
