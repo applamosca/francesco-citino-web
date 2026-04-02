@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { User, Mail, Phone, MapPin, Loader2, CheckCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -25,6 +26,7 @@ interface BookPurchaseFormProps {
 }
 
 export const BookPurchaseForm = ({ onSuccess, bookId, price }: BookPurchaseFormProps) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<ShippingData>({
     name: '',
     email: '',
@@ -102,12 +104,24 @@ export const BookPurchaseForm = ({ onSuccess, bookId, price }: BookPurchaseFormP
       if (error) throw error;
       if (orderData?.error) throw new Error(orderData.error);
 
-      setOrderComplete(true);
+      const orderId = orderData?.order?.id || '';
+      const orderRef = orderId.substring(0, 8).toUpperCase();
+
       toast({
         title: "Pagamento completato!",
         description: "Il tuo ordine è stato registrato. Riceverai una email di conferma.",
       });
       onSuccess?.();
+
+      // Redirect to thank you page
+      const params = new URLSearchParams({
+        ref: orderRef,
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        address: formData.shipping_address.trim(),
+        tx: transactionId || '',
+      });
+      navigate(`/grazie?${params.toString()}`);
     } catch (error: any) {
       console.error('Error processing order:', error);
       toast({

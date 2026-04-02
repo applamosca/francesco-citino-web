@@ -14,6 +14,7 @@ import AdminSecurity from "./pages/AdminSecurity";
 import AdminBlog from "./pages/AdminBlog";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
+import ThankYou from "./pages/ThankYou";
 
 // Booking App Pages
 import BookingHome from "./pages/booking/BookingHome";
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/admin/security" element={<AdminSecurity />} />
           <Route path="/admin/blog" element={<AdminBlog />} />
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/grazie" element={<ThankYou />} />
 
           {/* Booking App */}
           <Route path="/booking" element={<BookingHome />} />
