@@ -2,13 +2,16 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { useContent, type LibroContent } from "@/hooks/useContent";
-import { useBookStock, useDecrementStock } from "@/hooks/useBookStock";
+import { useBookStock } from "@/hooks/useBookStock";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ExternalLink, CheckCircle2, Users, Lightbulb, BookOpen, ShoppingCart, Package, AlertTriangle } from "lucide-react";
 import { BookPurchaseForm } from "@/components/BookPurchaseForm";
-import { toast } from "sonner";
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import bookCover from "@/assets/libro-cover.jpg";
+
+const PAYPAL_CLIENT_ID = "Aa0HCSnL2JZ3UOVjoOdsTJAw9SXFLZt2luZBOgc5Hyux6Oj0r_ua3zoGwOBRt4cYz4CKMB7wXeFQ7kgw";
+const BOOK_PRICE = 25.00;
 
 const Libro = () => {
   const ref = useRef(null);
@@ -16,11 +19,10 @@ const Libro = () => {
   const { data: content, isLoading } = useContent("libro");
   const libroContent = content as unknown as LibroContent;
   const { data: bookData } = useBookStock();
-  const decrementStock = useDecrementStock();
   const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
 
-  const stockAvailable = bookData ? bookData.stock_physic > 0 : true;
-  const amazonUrl = bookData?.amazon_ebook_url || "https://www.amazon.it";
+  const stockAvailable = bookData ? bookData.stock_physic > 0 : false;
+  const amazonUrl = bookData?.amazon_ebook_url || "https://www.amazon.it/GEOMETRIA-SEGRETA-DELLA-MENTE-ebook/dp/B0FKNFTNTS";
 
   if (isLoading || !libroContent) {
     return (
@@ -106,7 +108,7 @@ const Libro = () => {
                   <div className="flex items-center gap-2 mb-4 p-3 bg-muted rounded-lg">
                     <AlertTriangle className="text-muted-foreground" size={20} />
                     <p className="text-sm text-muted-foreground">
-                      Copie fisiche esaurite — disponibile online
+                      Copie cartacee esaurite. Disponibile su Amazon
                     </p>
                   </div>
                 )}
@@ -119,7 +121,7 @@ const Libro = () => {
                       onClick={() => setIsOrderDialogOpen(true)}
                     >
                       <ShoppingCart className="mr-2" size={20} />
-                      Acquista Copia Fisica
+                      Acquista Copia Fisica — €{BOOK_PRICE.toFixed(2)}
                     </Button>
                   ) : (
                     <Button
@@ -128,18 +130,18 @@ const Libro = () => {
                       onClick={() => window.open(amazonUrl, "_blank")}
                     >
                       <ExternalLink className="mr-2" size={20} />
-                      Acquista il Libro Online
+                      Acquista versione Ebook
                     </Button>
                   )}
                   <Button
-                      size="lg"
-                      variant="outline"
-                      className="flex-1 text-lg py-6"
-                      onClick={() => window.open("https://www.amazon.it/GEOMETRIA-SEGRETA-DELLA-MENTE-ebook/dp/B0FKNFTNTS", "_blank")}
-                    >
-                      Acquista Ebook
-                      <ExternalLink className="ml-2" size={20} />
-                    </Button>
+                    size="lg"
+                    variant="outline"
+                    className="flex-1 text-lg py-6"
+                    onClick={() => window.open(amazonUrl, "_blank")}
+                  >
+                    Acquista Ebook
+                    <ExternalLink className="ml-2" size={20} />
+                  </Button>
                 </div>
               </motion.div>
             </div>
@@ -259,7 +261,7 @@ const Libro = () => {
                     onClick={() => setIsOrderDialogOpen(true)}
                   >
                     <ShoppingCart className="mr-2" size={20} />
-                    Acquista il Libro
+                    Acquista il Libro — €{BOOK_PRICE.toFixed(2)}
                   </Button>
                 ) : (
                   <Button
@@ -268,7 +270,7 @@ const Libro = () => {
                     onClick={() => window.open(amazonUrl, "_blank")}
                   >
                     <ExternalLink className="mr-2" size={20} />
-                    Acquista il Libro Online
+                    Acquista versione Ebook
                   </Button>
                 )}
               </div>
@@ -277,7 +279,7 @@ const Libro = () => {
         </motion.div>
       </div>
 
-      {/* Dialog per l'ordine del libro */}
+      {/* Dialog per l'ordine del libro con PayPal */}
       <Dialog open={isOrderDialogOpen} onOpenChange={setIsOrderDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -285,10 +287,18 @@ const Libro = () => {
               Ordina "{libroContent.title}"
             </DialogTitle>
             <DialogDescription>
-              Compila il modulo per ordinare il libro. Riceverai una email di conferma con i dettagli dell'ordine.
+              Compila i dati di spedizione e completa il pagamento con PayPal.
             </DialogDescription>
           </DialogHeader>
-          <BookPurchaseForm onSuccess={() => setIsOrderDialogOpen(false)} />
+          {bookData && (
+            <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID, currency: "EUR" }}>
+              <BookPurchaseForm
+                onSuccess={() => setIsOrderDialogOpen(false)}
+                bookId={bookData.id}
+                price={BOOK_PRICE}
+              />
+            </PayPalScriptProvider>
+          )}
         </DialogContent>
       </Dialog>
     </section>
