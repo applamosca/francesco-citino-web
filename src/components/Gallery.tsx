@@ -49,6 +49,9 @@ const ImageWithFallback = ({
       src={src}
       alt={alt}
       className={className}
+      loading="lazy"
+      width={props.width || 400}
+      height={props.height || 300}
       onError={() => setHasError(true)}
       {...props}
     />

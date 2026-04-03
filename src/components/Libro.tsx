@@ -1,14 +1,14 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef, useState } from "react";
+import { useRef, useState, lazy, Suspense } from "react";
 import { useContent, type LibroContent } from "@/hooks/useContent";
 import { useBookStock } from "@/hooks/useBookStock";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { ExternalLink, CheckCircle2, Users, Lightbulb, BookOpen, ShoppingCart, Package, AlertTriangle } from "lucide-react";
-import { BookPurchaseForm } from "@/components/BookPurchaseForm";
-import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+import { ExternalLink, CheckCircle2, Users, Lightbulb, BookOpen, ShoppingCart, Package, AlertTriangle, Loader2 } from "lucide-react";
 import bookCover from "@/assets/libro-cover.jpg";
+
+const LazyPayPalCheckout = lazy(() => import("@/components/PayPalCheckout"));
 
 const PAYPAL_CLIENT_ID = "Aa0HCSnL2JZ3UOVjoOdsTJAw9SXFLZt2luZBOgc5Hyux6Oj0r_ua3zoGwOBRt4cYz4CKMB7wXeFQ7kgw";
 const BOOK_PRICE = 25.00;
@@ -290,14 +290,18 @@ const Libro = () => {
               Compila i dati di spedizione e completa il pagamento con PayPal.
             </DialogDescription>
           </DialogHeader>
-          {bookData && (
-            <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID, currency: "EUR" }}>
-              <BookPurchaseForm
+          {bookData && isOrderDialogOpen && (
+            <Suspense fallback={
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            }>
+              <LazyPayPalCheckout
                 onSuccess={() => setIsOrderDialogOpen(false)}
                 bookId={bookData.id}
                 price={BOOK_PRICE}
               />
-            </PayPalScriptProvider>
+            </Suspense>
           )}
         </DialogContent>
       </Dialog>

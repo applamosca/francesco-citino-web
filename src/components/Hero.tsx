@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Helmet } from "react-helmet-async";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroBg from "@/assets/hero-francesco.jpg";
@@ -38,15 +39,19 @@ const Hero = () => {
   }
 
   return (
-    <section
-      id="hero"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
-      style={{
-        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.15)), url(${heroBg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
+    <>
+      <Helmet>
+        <link rel="preload" as="image" href={heroBg} fetchPriority="high" />
+      </Helmet>
+      <section
+        id="hero"
+        className="relative min-h-screen flex items-center justify-center overflow-hidden"
+        style={{
+          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.15)), url(${heroBg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -91,7 +96,8 @@ const Hero = () => {
       >
         <ChevronDown className="text-primary animate-bounce" size={32} />
       </motion.div>
-    </section>
+      </section>
+    </>
   );
 };
 
