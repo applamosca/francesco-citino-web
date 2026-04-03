@@ -1,8 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCcw, Play } from "lucide-react";
+import { Camera, X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCcw, Play, ImageOff } from "lucide-react";
 
 interface GalleryPhoto {
   id: string;
@@ -12,8 +12,47 @@ interface GalleryPhoto {
   display_order: number;
 }
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+
+const resolveImageUrl = (url: string): string => {
+  if (!url) return "";
+  if (url.startsWith("http")) return url;
+  // Partial path — reconstruct full storage URL
+  return `${SUPABASE_URL}/storage/v1/object/public/${url}`;
+};
+
 const isVideoUrl = (url: string): boolean => {
   return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url);
+};
+
+const ImageWithFallback = ({
+  src,
+  alt,
+  className,
+  ...props
+}: React.ImgHTMLAttributes<HTMLImageElement>) => {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError) {
+    return (
+      <div className={`flex items-center justify-center bg-muted/50 ${className}`}>
+        <div className="text-center p-4">
+          <ImageOff className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+          <p className="text-xs text-muted-foreground">Immagine non disponibile</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      onError={() => setHasError(true)}
+      {...props}
+    />
+  );
 };
 
 const Gallery = () => {
@@ -21,6 +60,7 @@ const Gallery = () => {
   const [zoom, setZoom] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const constraintsRef = useRef(null);
+  const queryClient = useQueryClient();
 
   const { data: photos, isLoading } = useQuery({
     queryKey: ["gallery-photos"],
@@ -32,9 +72,30 @@ const Gallery = () => {
         .order("display_order", { ascending: true });
 
       if (error) throw error;
-      return data as GalleryPhoto[];
+      return (data as GalleryPhoto[]).map((p) => ({
+        ...p,
+        image_url: resolveImageUrl(p.image_url),
+      }));
     },
   });
+
+  // Realtime subscription
+  useEffect(() => {
+    const channel = supabase
+      .channel("gallery-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "gallery_photos" },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["gallery-photos"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   const openLightbox = (index: number) => {
     setSelectedIndex(index);
@@ -48,21 +109,21 @@ const Gallery = () => {
     setPosition({ x: 0, y: 0 });
   };
 
-  const goToPrevious = () => {
+  const goToPrevious = useCallback(() => {
     if (selectedIndex !== null && photos) {
       setSelectedIndex(selectedIndex === 0 ? photos.length - 1 : selectedIndex - 1);
       setZoom(1);
       setPosition({ x: 0, y: 0 });
     }
-  };
+  }, [selectedIndex, photos]);
 
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     if (selectedIndex !== null && photos) {
       setSelectedIndex(selectedIndex === photos.length - 1 ? 0 : selectedIndex + 1);
       setZoom(1);
       setPosition({ x: 0, y: 0 });
     }
-  };
+  }, [selectedIndex, photos]);
 
   const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.5, 4));
   const handleZoomOut = () => {
@@ -85,7 +146,6 @@ const Gallery = () => {
 
   const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     if (zoom > 1) return;
-    
     const threshold = 100;
     if (info.offset.x > threshold) {
       goToPrevious();
@@ -105,10 +165,7 @@ const Gallery = () => {
 
   if (isLoading) {
     return (
-      <section
-        id="galleria"
-        className="py-20 px-4 bg-gradient-to-b from-muted/20 to-background"
-      >
+      <section id="galleria" className="py-20 px-4 bg-gradient-to-b from-muted/20 to-background">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <div className="h-12 bg-primary/20 rounded-lg w-1/4 mx-auto mb-4 animate-pulse" />
@@ -130,34 +187,20 @@ const Gallery = () => {
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
   };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 40, scale: 0.9 },
     visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        type: "spring" as const,
-        stiffness: 100,
-        damping: 15,
-      },
+      opacity: 1, y: 0, scale: 1,
+      transition: { type: "spring" as const, stiffness: 100, damping: 15 },
     },
   };
 
   return (
     <>
-      <section
-        id="galleria"
-        className="py-20 px-4 bg-gradient-to-b from-muted/20 to-background"
-      >
+      <section id="galleria" className="py-20 px-4 bg-gradient-to-b from-muted/20 to-background">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -175,9 +218,7 @@ const Gallery = () => {
               >
                 <Camera className="w-8 h-8 text-primary" />
               </motion.div>
-              <h2 className="text-4xl md:text-5xl font-bold text-foreground">
-                Galleria
-              </h2>
+              <h2 className="text-4xl md:text-5xl font-bold text-foreground">Galleria</h2>
             </div>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Momenti e immagini dal mio percorso professionale
@@ -215,24 +256,20 @@ const Gallery = () => {
                     </div>
                   </div>
                 ) : (
-                  <motion.img
-                    src={photo.image_url}
-                    alt={photo.title}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ duration: 0.5 }}
-                  />
+                  <motion.div className="w-full h-full" whileHover={{ scale: 1.1 }} transition={{ duration: 0.5 }}>
+                    <ImageWithFallback
+                      src={photo.image_url}
+                      alt={photo.title}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </motion.div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                    <h3 className="text-xl font-bold text-white mb-2">
-                      {photo.title}
-                    </h3>
+                    <h3 className="text-xl font-bold text-white mb-2">{photo.title}</h3>
                     {photo.description && (
-                      <p className="text-white/80 text-sm line-clamp-3">
-                        {photo.description}
-                      </p>
+                      <p className="text-white/80 text-sm line-clamp-3">{photo.description}</p>
                     )}
                   </div>
                 </div>
@@ -312,7 +349,7 @@ const Gallery = () => {
               <X className="w-6 h-6" />
             </motion.button>
 
-            {/* Navigation buttons - hidden when zoomed */}
+            {/* Navigation buttons */}
             {zoom === 1 && (
               <>
                 <motion.button
@@ -326,7 +363,6 @@ const Gallery = () => {
                 >
                   <ChevronLeft className="w-8 h-8" />
                 </motion.button>
-
                 <motion.button
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -341,7 +377,7 @@ const Gallery = () => {
               </>
             )}
 
-            {/* Image container with swipe and zoom */}
+            {/* Image container */}
             <motion.div
               key={selectedIndex}
               initial={{ opacity: 0, scale: 0.9 }}
@@ -373,11 +409,7 @@ const Gallery = () => {
                     dragElastic={0.1}
                     onDragEnd={handleDragEnd}
                     onDoubleClick={handleDoubleTap}
-                    animate={{
-                      scale: zoom,
-                      x: position.x,
-                      y: position.y,
-                    }}
+                    animate={{ scale: zoom, x: position.x, y: position.y }}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     style={{ touchAction: "none" }}
                     whileDrag={{ cursor: "grabbing" }}
@@ -385,7 +417,6 @@ const Gallery = () => {
                 )}
               </motion.div>
 
-              {/* Swipe hint for mobile */}
               {zoom === 1 && (
                 <motion.p
                   initial={{ opacity: 0 }}
@@ -407,9 +438,7 @@ const Gallery = () => {
                   {photos[selectedIndex].title}
                 </h3>
                 {photos[selectedIndex].description && (
-                  <p className="text-white/70 max-w-xl">
-                    {photos[selectedIndex].description}
-                  </p>
+                  <p className="text-white/70 max-w-xl">{photos[selectedIndex].description}</p>
                 )}
                 <p className="text-white/50 text-sm mt-2">
                   {selectedIndex + 1} / {photos.length}
