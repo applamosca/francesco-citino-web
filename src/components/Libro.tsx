@@ -8,19 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { ExternalLink, CheckCircle2, Users, Lightbulb, BookOpen, ShoppingCart, Package, AlertTriangle, Loader2 } from "lucide-react";
 import bookCover from "@/assets/libro-cover.jpg";
 
-const LazyPayPalCheckout = lazy(() =>
-  import("@paypal/react-paypal-js").then((mod) => ({
-    default: ({ bookId, price, onSuccess }: { bookId: string; price: number; onSuccess: () => void }) => {
-      const { PayPalScriptProvider } = mod;
-      const { BookPurchaseForm } = require("@/components/BookPurchaseForm");
-      return (
-        <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID, currency: "EUR" }}>
-          <BookPurchaseForm onSuccess={onSuccess} bookId={bookId} price={price} />
-        </PayPalScriptProvider>
-      );
-    },
-  }))
-);
+const LazyPayPalCheckout = lazy(() => import("@/components/PayPalCheckout"));
 
 const PAYPAL_CLIENT_ID = "Aa0HCSnL2JZ3UOVjoOdsTJAw9SXFLZt2luZBOgc5Hyux6Oj0r_ua3zoGwOBRt4cYz4CKMB7wXeFQ7kgw";
 const BOOK_PRICE = 25.00;
