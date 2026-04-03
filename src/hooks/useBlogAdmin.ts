@@ -115,6 +115,7 @@ export const useBlogAdmin = () => {
     mutationFn: (id: string) => callBlogAdmin('delete_article', { id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-blog-articles'] });
+      queryClient.invalidateQueries({ queryKey: ['blog-posts-homepage'] });
       toast({ title: 'Articolo eliminato' });
     },
     onError: (error: Error) => {
