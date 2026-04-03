@@ -96,7 +96,8 @@ const Hero = () => {
       >
         <ChevronDown className="text-primary animate-bounce" size={32} />
       </motion.div>
-    </section>
+      </section>
+    </>
   );
 };
 
