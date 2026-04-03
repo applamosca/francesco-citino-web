@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 interface BlogPost {
   id: string;
@@ -12,18 +13,20 @@ interface BlogPost {
   excerpt: string | null;
   featured_image: string | null;
   published_at: string | null;
-  status: string | null;
+  status: string;
+  created_at: string;
 }
 
 const Blog = () => {
   const ref = useRef(null);
 
   const { data: posts, isLoading } = useQuery({
-    queryKey: ["blog-posts"],
+    queryKey: ["blog-posts-homepage"],
     queryFn: async () => {
+      // Query blog_articles (the active table managed by admin)
       const { data, error } = await supabase
-        .from("blog_posts")
-        .select("*")
+        .from("blog_articles")
+        .select("id, title, slug, excerpt, featured_image, published_at, status, created_at")
         .eq("status", "published")
         .order("published_at", { ascending: false });
 
@@ -104,14 +107,16 @@ const Blog = () => {
               className="group bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-border hover:border-primary/50"
             >
               {post.featured_image && (
-                <div className="relative h-48 overflow-hidden bg-muted">
-                  <img
-                    src={post.featured_image}
-                    alt={post.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    loading="lazy"
-                  />
-                </div>
+                <Link to={`/blog/${post.slug}`}>
+                  <div className="relative h-48 overflow-hidden bg-muted">
+                    <img
+                      src={post.featured_image}
+                      alt={post.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                  </div>
+                </Link>
               )}
 
               <div className="p-6">
@@ -123,7 +128,7 @@ const Blog = () => {
                 </div>
 
                 <h3 className="text-xl font-bold text-foreground mb-3 line-clamp-2 group-hover:text-primary transition-colors">
-                  {post.title}
+                  <Link to={`/blog/${post.slug}`}>{post.title}</Link>
                 </h3>
 
                 {post.excerpt && (
@@ -137,10 +142,10 @@ const Blog = () => {
                   className="group/btn p-0 h-auto font-semibold text-primary hover:text-primary/80"
                   asChild
                 >
-                  <a href={`/blog/${post.slug}`}>
+                  <Link to={`/blog/${post.slug}`}>
                     Leggi l'articolo
                     <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                  </a>
+                  </Link>
                 </Button>
               </div>
             </motion.article>
