@@ -103,6 +103,7 @@ export const useBlogAdmin = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-blog-articles'] });
+      queryClient.invalidateQueries({ queryKey: ['blog-posts-homepage'] });
       toast({ title: 'Articolo aggiornato con successo' });
     },
     onError: (error: Error) => {
