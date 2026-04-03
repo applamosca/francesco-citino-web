@@ -80,6 +80,7 @@ export const useBlogAdmin = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-blog-articles'] });
+      queryClient.invalidateQueries({ queryKey: ['blog-posts-homepage'] });
       toast({ title: 'Articolo creato con successo' });
     },
     onError: (error: Error) => {
@@ -102,6 +103,7 @@ export const useBlogAdmin = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-blog-articles'] });
+      queryClient.invalidateQueries({ queryKey: ['blog-posts-homepage'] });
       toast({ title: 'Articolo aggiornato con successo' });
     },
     onError: (error: Error) => {
@@ -113,6 +115,7 @@ export const useBlogAdmin = () => {
     mutationFn: (id: string) => callBlogAdmin('delete_article', { id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-blog-articles'] });
+      queryClient.invalidateQueries({ queryKey: ['blog-posts-homepage'] });
       toast({ title: 'Articolo eliminato' });
     },
     onError: (error: Error) => {
