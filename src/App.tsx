@@ -15,6 +15,7 @@ import AdminBlog from "./pages/AdminBlog";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 import ThankYou from "./pages/ThankYou";
+import BlogPost from "./pages/BlogPost";
 
 // Booking App Pages
 import BookingHome from "./pages/booking/BookingHome";
