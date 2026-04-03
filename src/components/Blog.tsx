@@ -92,7 +92,7 @@ const Blog = () => {
             Blog
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Articoli, riflessioni e approfondimenti su psicologia, filosofia della mente e ricerca cognitiva
+            Articoli, riflessioni e approfondimenti
           </p>
         </motion.div>
 
