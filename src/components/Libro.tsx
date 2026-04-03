@@ -290,14 +290,18 @@ const Libro = () => {
               Compila i dati di spedizione e completa il pagamento con PayPal.
             </DialogDescription>
           </DialogHeader>
-          {bookData && (
-            <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID, currency: "EUR" }}>
-              <BookPurchaseForm
+          {bookData && isOrderDialogOpen && (
+            <Suspense fallback={
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            }>
+              <LazyPayPalCheckout
                 onSuccess={() => setIsOrderDialogOpen(false)}
                 bookId={bookData.id}
                 price={BOOK_PRICE}
               />
-            </PayPalScriptProvider>
+            </Suspense>
           )}
         </DialogContent>
       </Dialog>
