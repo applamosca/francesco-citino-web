@@ -11,7 +11,7 @@ import bookCover from "@/assets/libro-cover.jpg";
 const LazyPayPalCheckout = lazy(() => import("@/components/PayPalCheckout"));
 
 const PAYPAL_CLIENT_ID = "Aa0HCSnL2JZ3UOVjoOdsTJAw9SXFLZt2luZBOgc5Hyux6Oj0r_ua3zoGwOBRt4cYz4CKMB7wXeFQ7kgw";
-const BOOK_PRICE = 25.00;
+const BOOK_PRICE = 15.00;
 
 const Libro = () => {
   const ref = useRef(null);
