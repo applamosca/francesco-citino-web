@@ -6,6 +6,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
+import CoursesPage from "./pages/courses/CoursesPage";
+import CourseDetailPage from "./pages/courses/CourseDetailPage";
+import AdminCourses from "./pages/AdminCourses";
 import GalleryPage from "./pages/GalleryPage";
 import AdminNew from "./pages/AdminNew";
 import AdminPanel from "./pages/AdminPanel";
@@ -41,6 +44,9 @@ const App = () => (
           <Route path="/admin/messages" element={<AdminNew />} />
           <Route path="/admin/panel" element={<AdminPanel />} />
           <Route path="/admin/gallery" element={<AdminGallery />} />
+          <Route path="/admin/corsi" element={<AdminCourses />} />
+          <Route path="/corsi" element={<CoursesPage />} />
+          <Route path="/corsi/:slug" element={<CourseDetailPage />} />
           <Route path="/admin/security" element={<AdminSecurity />} />
           <Route path="/admin/blog" element={<AdminBlog />} />
           <Route path="/auth" element={<AuthPage />} />

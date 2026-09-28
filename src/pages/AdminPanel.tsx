@@ -8,7 +8,8 @@ import {
   Image, 
   FileText, 
   Settings,
-  BookOpen
+  BookOpen,
+  GraduationCap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,6 +44,13 @@ const adminSections = [
     icon: BookOpen,
     path: "/admin/blog",
     color: "text-purple-500",
+  },
+  {
+    title: "Corsi",
+    description: "Crea corsi, lezioni video, capitoli e gestisci gli iscritti",
+    icon: GraduationCap,
+    path: "/admin/corsi",
+    color: "text-rose-500",
   },
 ];
 
