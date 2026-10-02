@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { TurnstileWidget } from '@/components/TurnstileWidget';
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -14,6 +15,15 @@ const AuthPage = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  // Token Turnstile: monouso, va rigenerato dopo ogni tentativo
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaKey, setCaptchaKey] = useState(0);
+  const handleCaptchaVerify = useCallback((token: string) => setCaptchaToken(token), []);
+  const handleCaptchaReset = useCallback(() => setCaptchaToken(null), []);
+  const resetCaptcha = () => {
+    setCaptchaToken(null);
+    setCaptchaKey((k) => k + 1);
+  };
   
   const { signIn, signUp } = useAuth();
   const { toast } = useToast();
@@ -35,13 +45,16 @@ const AuthPage = () => {
 
     try {
       const { error } = isLogin 
-        ? await signIn(email, password)
-        : await signUp(email, password);
+        ? await signIn(email, password, captchaToken ?? undefined)
+        : await signUp(email, password, captchaToken ?? undefined);
 
       if (error) {
+        resetCaptcha();
         toast({
           title: "Errore",
-          description: error.message,
+          description: /captcha/i.test(error.message)
+            ? "Verifica di sicurezza non superata. Attendi il controllo e riprova."
+            : error.message,
           variant: "destructive",
         });
       } else {
@@ -57,6 +70,7 @@ const AuthPage = () => {
         description: "Si è verificato un errore",
         variant: "destructive",
       });
+      resetCaptcha();
     } finally {
       setIsLoading(false);
     }
@@ -126,6 +140,13 @@ const AuthPage = () => {
                 </button>
               </div>
             </div>
+
+            <TurnstileWidget
+              key={captchaKey}
+              onVerify={handleCaptchaVerify}
+              onError={handleCaptchaReset}
+              onExpire={handleCaptchaReset}
+            />
 
             <Button
               type="submit"

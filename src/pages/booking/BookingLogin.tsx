@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { BookingNavbar } from '@/components/booking/BookingNavbar';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { TurnstileWidget } from '@/components/TurnstileWidget';
 
 export const BookingLogin = () => {
   const navigate = useNavigate();
@@ -21,6 +22,16 @@ export const BookingLogin = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  // Token Turnstile: monouso, va rigenerato dopo ogni tentativo
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaKey, setCaptchaKey] = useState(0);
+  const handleCaptchaVerify = useCallback((token: string) => setCaptchaToken(token), []);
+  const handleCaptchaReset = useCallback(() => setCaptchaToken(null), []);
+  const resetCaptcha = () => {
+    setCaptchaToken(null);
+    setCaptchaKey((k) => k + 1);
+  };
+  const captchaErrorMessage = 'Verifica di sicurezza non superata. Attendi il controllo e riprova.';
 
   const returnTo = (location.state as { returnTo?: string })?.returnTo || '/booking/dashboard';
 
@@ -30,12 +41,15 @@ export const BookingLogin = () => {
 
     try {
       if (isLogin) {
-        const { error } = await signIn(email, password);
+        const { error } = await signIn(email, password, captchaToken ?? undefined);
         if (error) {
+          resetCaptcha();
           toast({
             title: 'Errore di accesso',
             description: error.message === 'Invalid login credentials'
               ? 'Email o password non corretti'
+              : /captcha/i.test(error.message)
+              ? captchaErrorMessage
               : error.message,
             variant: 'destructive',
           });
@@ -54,12 +68,15 @@ export const BookingLogin = () => {
           });
           return;
         }
-        const { error } = await signUp(email, password);
+        const { error } = await signUp(email, password, captchaToken ?? undefined);
         if (error) {
+          resetCaptcha();
           toast({
             title: 'Errore di registrazione',
             description: error.message === 'User already registered'
               ? 'Questo indirizzo email è già registrato'
+              : /captcha/i.test(error.message)
+              ? captchaErrorMessage
               : error.message,
             variant: 'destructive',
           });
@@ -154,6 +171,13 @@ export const BookingLogin = () => {
                     </button>
                   </div>
                 </div>
+
+                <TurnstileWidget
+                  key={captchaKey}
+                  onVerify={handleCaptchaVerify}
+                  onError={handleCaptchaReset}
+                  onExpire={handleCaptchaReset}
+                />
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading

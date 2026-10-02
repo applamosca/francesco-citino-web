@@ -62,23 +62,25 @@ export const useAuth = () => {
     setIsAdminLoading(false);
   };
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, captchaToken?: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: redirectUrl
+        emailRedirectTo: redirectUrl,
+        captchaToken,
       }
     });
     return { error };
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, captchaToken?: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
+      options: { captchaToken },
     });
     
     // Log access attempt
