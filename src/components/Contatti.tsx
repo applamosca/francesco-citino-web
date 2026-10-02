@@ -42,12 +42,18 @@ const Contatti = () => {
     );
   }
 
+  // Indirizzo dello studio: modificabile dal pannello admin (sezione Contatti),
+  // con fallback all'indirizzo storico se i campi non sono ancora valorizzati.
+  const street = contattiContent.addressStreet?.trim() || "Via Andria, 52";
+  const city = contattiContent.addressCity?.trim() || "Barletta";
+  const postalCode = contattiContent.addressPostalCode?.trim() || "76121";
+  const country = contattiContent.addressCountry?.trim() || "Italia";
   const studioAddress = {
-    street: "Via Andria, 52",
-    city: "Barletta",
-    postalCode: "76121",
-    country: "Italia",
-    fullAddress: "Via Andria, 52, 76121 Barletta BT, Italia"
+    street,
+    city,
+    postalCode,
+    country,
+    fullAddress: `${street}, ${postalCode} ${city}, ${country}`
   };
 
   const localBusinessSchema = {
@@ -167,12 +173,12 @@ const Contatti = () => {
             <div className="relative w-full overflow-hidden rounded-3xl shadow-xl">
               <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
                 <iframe
-                  src="https://www.google.com/maps?q=Via+Andria,+52,+76121+Barletta+BT,+Italia&output=embed"
+                  src={`https://www.google.com/maps?q=${encodeURIComponent(studioAddress.fullAddress)}&output=embed`}
                   className="absolute inset-0 w-full h-full border-0"
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
                   title="Mappa Studio Francesco Citino"
-                  aria-label="Mappa della posizione dello studio a Barletta"
+                  aria-label={`Mappa della posizione dello studio a ${studioAddress.city}`}
                 />
               </div>
             </div>

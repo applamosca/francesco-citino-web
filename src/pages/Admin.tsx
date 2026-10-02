@@ -59,6 +59,10 @@ const Admin = () => {
     facebookUrl: "",
     whatsapp: "",
     whatsappUrl: "",
+    addressStreet: "",
+    addressPostalCode: "",
+    addressCity: "",
+    addressCountry: "",
   });
 
   const updateContentMutation = useUpdateContent();
@@ -582,6 +586,52 @@ const Admin = () => {
                 value={contattiForm.whatsappUrl || ""}
                 onChange={(e) => setContattiForm({ ...contattiForm, whatsappUrl: e.target.value })}
                 placeholder="https://wa.me/..."
+              />
+            </div>
+            <div className="pt-4 border-t border-border/50">
+              <p className="font-semibold mb-1">Dove ricevo</p>
+              <p className="text-sm text-muted-foreground mb-4">
+                Indirizzo dello studio mostrato nella sezione Contatti e sulla mappa.
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="contatti-address-street">Via e numero civico</Label>
+              <Input
+                id="contatti-address-street"
+                value={contattiForm.addressStreet || ""}
+                onChange={(e) => setContattiForm({ ...contattiForm, addressStreet: e.target.value })}
+                placeholder="Via Andria, 52"
+                maxLength={120}
+              />
+            </div>
+            <div>
+              <Label htmlFor="contatti-address-postal">CAP</Label>
+              <Input
+                id="contatti-address-postal"
+                value={contattiForm.addressPostalCode || ""}
+                onChange={(e) => setContattiForm({ ...contattiForm, addressPostalCode: e.target.value })}
+                placeholder="76121"
+                maxLength={10}
+              />
+            </div>
+            <div>
+              <Label htmlFor="contatti-address-city">Città</Label>
+              <Input
+                id="contatti-address-city"
+                value={contattiForm.addressCity || ""}
+                onChange={(e) => setContattiForm({ ...contattiForm, addressCity: e.target.value })}
+                placeholder="Barletta"
+                maxLength={80}
+              />
+            </div>
+            <div>
+              <Label htmlFor="contatti-address-country">Paese</Label>
+              <Input
+                id="contatti-address-country"
+                value={contattiForm.addressCountry || ""}
+                onChange={(e) => setContattiForm({ ...contattiForm, addressCountry: e.target.value })}
+                placeholder="Italia"
+                maxLength={60}
               />
             </div>
             <Button onClick={() => handleSave("contatti", contattiForm)} disabled={updateContentMutation.isPending}>

@@ -46,6 +46,10 @@ export interface ContattiContent {
   facebookUrl?: string;
   whatsapp?: string;
   whatsappUrl?: string;
+  addressStreet?: string;
+  addressPostalCode?: string;
+  addressCity?: string;
+  addressCountry?: string;
 }
 
 export const useContent = (section: string) => {
